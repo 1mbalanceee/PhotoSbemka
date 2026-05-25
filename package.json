@@ -1,14 +1,6 @@
 {
   "name": "nadezhda-photo-portfolio",
   "version": "1.0.0",
-  "description": "Premium photography portfolio site for Nadezhda Konovalova with Express & Sequelize backend",
-  "type": "commonjs",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "build": "echo 'Static build complete'"
-  },
-  "dependencies": {
-    "express": "^4.19.2"
-  }
+  "description": "Premium photography portfolio site for Nadezhda Konovalova",
+  "private": true
 }
