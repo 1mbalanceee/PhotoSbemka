@@ -1,114 +1,93 @@
 const express = require('express');
-const { Sequelize, DataTypes } = require('sequelize');
 const path = require('path');
-
-// Force Vercel's static analysis (Node File Trace) to bundle the sqlite3 native module
-try {
-  require('sqlite3');
-} catch (e) {
-  console.warn('sqlite3 native preload warning:', e.message);
-}
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Determine database path. On Vercel, the file system is read-only except for /tmp.
-const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
-const dbPath = isVercel
-  ? '/tmp/database.sqlite'
-  : path.join(__dirname, 'database.sqlite');
-
-// Initialize Sequelize with SQLite database
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: dbPath,
-  logging: false, // Turn off query logging for cleaner server output
-});
-
-// Define the Lead Model
-const Lead = sequelize.define('Lead', {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    validate: {
-      notEmpty: true,
-    },
-  },
-  contact: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    validate: {
-      notEmpty: true,
-    },
-  },
-  kind: {
-    type: DataTypes.STRING,
-    defaultValue: 'family',
-  },
-  when: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  msg: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  date: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-}, {
-  timestamps: true, // Auto adds createdAt, updatedAt
-});
-
 // Middleware
 app.use(express.json());
 
-// API Endpoints
+let LeadModel = null;
+let memoryLeads = [];
+let memoryId = 1;
 
-// 1. Create a new lead (submission from contact form)
+try {
+  const { Sequelize, DataTypes } = require('sequelize');
+  const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
+  const dbPath = isVercel ? '/tmp/database.sqlite' : path.join(__dirname, 'database.sqlite');
+  
+  const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: dbPath,
+    logging: false,
+  });
+
+  LeadModel = sequelize.define('Lead', {
+    name: { type: DataTypes.STRING, allowNull: false, validate: { notEmpty: true } },
+    contact: { type: DataTypes.STRING, allowNull: false, validate: { notEmpty: true } },
+    kind: { type: DataTypes.STRING, defaultValue: 'family' },
+    when: { type: DataTypes.STRING, allowNull: true },
+    msg: { type: DataTypes.TEXT, allowNull: true },
+    date: { type: DataTypes.STRING, allowNull: false },
+  }, { timestamps: true });
+
+  if (!process.env.VERCEL) {
+    sequelize.sync().catch(console.error);
+  } else {
+    // Attempt sync synchronously for Vercel
+    sequelize.sync().catch(console.error);
+  }
+} catch (error) {
+  console.warn('SQLite is not available, falling back to in-memory storage. Error:', error.message);
+}
+
+// 1. Create a new lead
 app.post('/api/leads', async (req, res) => {
   try {
     const { name, contact, kind, when, msg, date } = req.body;
-    
-    if (!name || !contact) {
-      return res.status(400).json({ error: 'Name and contact are required fields.' });
-    }
+    if (!name || !contact) return res.status(400).json({ error: 'Name and contact are required fields.' });
 
-    const lead = await Lead.create({ name, contact, kind, when, msg, date });
-    return res.status(201).json(lead);
+    if (LeadModel) {
+      const lead = await LeadModel.create({ name, contact, kind, when, msg, date });
+      return res.status(201).json(lead);
+    } else {
+      const lead = { id: memoryId++, name, contact, kind, when, msg, date, createdAt: new Date(), updatedAt: new Date() };
+      memoryLeads.unshift(lead);
+      return res.status(201).json(lead);
+    }
   } catch (error) {
-    console.error('Error creating lead:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// 2. Get all leads (sorted by newest first)
+// 2. Get all leads
 app.get('/api/leads', async (req, res) => {
   try {
-    const leads = await Lead.findAll({
-      order: [['id', 'DESC']],
-    });
-    return res.json(leads);
+    if (LeadModel) {
+      const leads = await LeadModel.findAll({ order: [['id', 'DESC']] });
+      return res.json(leads);
+    } else {
+      return res.json(memoryLeads);
+    }
   } catch (error) {
-    console.error('Error fetching leads:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// 3. Delete a specific lead by ID
+// 3. Delete a lead
 app.delete('/api/leads/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedCount = await Lead.destroy({ where: { id } });
-    
-    if (deletedCount === 0) {
-      return res.status(404).json({ error: 'Lead not found.' });
+    if (LeadModel) {
+      const count = await LeadModel.destroy({ where: { id } });
+      if (count === 0) return res.status(404).json({ error: 'Not found' });
+    } else {
+      const initialLength = memoryLeads.length;
+      memoryLeads = memoryLeads.filter(l => l.id != id);
+      if (memoryLeads.length === initialLength) return res.status(404).json({ error: 'Not found' });
     }
-    
     return res.json({ success: true });
   } catch (error) {
-    console.error('Error deleting lead:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -116,43 +95,23 @@ app.delete('/api/leads/:id', async (req, res) => {
 // 4. Clear all leads
 app.delete('/api/leads', async (req, res) => {
   try {
-    await Lead.destroy({ truncate: true });
+    if (LeadModel) {
+      await LeadModel.destroy({ truncate: true });
+    } else {
+      memoryLeads = [];
+    }
     return res.json({ success: true });
   } catch (error) {
-    console.error('Error clearing leads:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// Serve static frontend files from current directory
+// Serve static files
 app.use(express.static(__dirname));
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-// Route wildcard: send all other requests to index.html for client-side routing (/admin, /story, etc.)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Sync Database and start server
-async function start() {
-  try {
-    await sequelize.authenticate();
-    await sequelize.sync(); // Creates tables if they do not exist
-    console.log('Database connected and synchronized successfully.');
-    
-    app.listen(PORT, () => {
-      console.log(`Server is running at http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to initialize database/server:', error);
-    process.exit(1);
-  }
-}
-
-// Export Express app for Vercel serverless environment
 if (process.env.VERCEL) {
-  // Sync db synchronously for Vercel before requests
-  sequelize.sync().catch(console.error);
   module.exports = app;
 } else {
-  start();
+  app.listen(PORT, () => console.log(`Server is running at http://localhost:${PORT}`));
 }
