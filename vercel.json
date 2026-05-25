@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "functions": {
+    "api/leads.js": {
+      "includeFiles": "node_modules/sqlite3/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/leads.js" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/story", "destination": "/index.html" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}
