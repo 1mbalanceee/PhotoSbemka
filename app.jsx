@@ -1,3 +1,6 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
 // app.jsx — root app + Tweaks wiring + theming
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{

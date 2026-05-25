@@ -1,7 +1,7 @@
 // sections.jsx — page sections for Nadezhda Konovalova portfolio.
 // All components share global window scope.
 
-const { useState, useEffect, useRef, useMemo } = React;
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 // Russian locative (prepositional) case for city names.
 // Handles the common patterns; defaults to appending -е otherwise.
