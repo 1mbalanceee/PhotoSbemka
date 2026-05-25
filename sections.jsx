@@ -147,7 +147,7 @@ function Nav() {
             color: '#1A140C', fontFamily: 'var(--serif)', fontSize: 16, fontStyle: 'italic',
             fontWeight: 600,
           }}>N</span>
-          <span style={{
+          <span className="nav-title" style={{
             fontFamily: 'var(--serif)', fontSize: 19, letterSpacing: '.01em', color: 'var(--ink)',
             fontWeight: 500,
           }}>
@@ -293,7 +293,7 @@ function Nav() {
 function HeroCollage({ city }) {
   return (
     <section id="top" style={{ padding: '40px 0 80px' }}>
-      <div className="container" style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: 56, alignItems: 'center' }}>
+      <div className="hero-grid container" style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: 56, alignItems: 'center' }}>
         <div>
           <div style={{
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
@@ -373,7 +373,7 @@ function HeroSingle({ city }) {
   return (
     <section id="top" style={{ padding: '24px 0 80px' }}>
       <div className="container">
-        <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden' }}>
+        <div className="hero-single-wrapper" style={{ position: 'relative', borderRadius: 12, overflow: 'hidden' }}>
           <Placeholder caption="hero · полнокадровый снимок · ребёнок в окне, тёплый свет" idx={0} ratio="16/9" rounded={12} />
           <div style={{
             position: 'absolute', inset: 0,
@@ -440,7 +440,7 @@ function HeroSlider({ city }) {
   }, []);
   return (
     <section id="top" style={{ padding: '40px 0 80px' }}>
-      <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 56, alignItems: 'center' }}>
+      <div className="hero-slider-grid container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 56, alignItems: 'center' }}>
         <div>
           <div style={{
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
@@ -523,7 +523,7 @@ function About() {
     <section id="about" style={{ padding: '80px 0 100px' }}>
       <div className="container">
         <SectionLabel num="01">Обо&nbsp;мне · Философия</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.15fr', gap: 64, alignItems: 'start' }}>
+        <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.15fr', gap: 64, alignItems: 'start' }}>
           <div>
             <Placeholder caption="портрет автора · мягкий свет" idx={1} ratio="4/5" rounded={6} frame />
             <div style={{ marginTop: 24, paddingLeft: 4 }}>
@@ -555,7 +555,7 @@ function About() {
               </p>
             </div>
 
-            <div style={{
+            <div className="regalia-grid" style={{
               marginTop: 44, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1,
               background: 'rgba(42,37,32,.12)',
               border: '1px solid rgba(42,37,32,.12)',
@@ -806,7 +806,7 @@ function PortfolioTabs() {
       <p style={{ maxWidth: 540, fontSize: 16, lineHeight: 1.55, color: 'var(--ink-soft)', margin: '0 0 28px' }}>
         {cat.blurb}
       </p>
-      <div style={{
+      <div className="portfolio-tabs-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
         gap: 14,
@@ -814,7 +814,7 @@ function PortfolioTabs() {
         {cat.items.map((it, idx) => {
           const span = idx % 5 === 0 ? 7 : idx % 5 === 1 ? 5 : idx % 5 === 2 ? 4 : idx % 5 === 3 ? 4 : 4;
           return (
-            <div key={idx} style={{ gridColumn: `span ${span}`, cursor: 'zoom-in' }}
+            <div key={idx} className={`portfolio-item span-${span}`} style={{ gridColumn: `span ${span}`, cursor: 'zoom-in' }}
                  onClick={() => setLbIdx(idx)}>
               <Placeholder caption={it.c} idx={it.tone} ratio={it.ratio} rounded={4} />
             </div>
@@ -854,7 +854,7 @@ function PortfolioMasonry() {
           }}>{c.label}</button>
         ))}
       </div>
-      <div style={{ columnCount: 3, columnGap: 14 }}>
+      <div className="portfolio-masonry-grid" style={{ columnCount: 3, columnGap: 14 }}>
         {items.map((it, idx) => (
           <div key={it._key} style={{ breakInside: 'avoid', marginBottom: 14, cursor: 'zoom-in' }}
                onClick={() => setLbIdx(idx)}>
@@ -898,7 +898,7 @@ function PortfolioScroll() {
               {c.blurb}
             </div>
           </div>
-          <div style={{
+          <div className="portfolio-scroll-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(12, 1fr)',
             gap: 12,
@@ -910,7 +910,7 @@ function PortfolioScroll() {
               const row = layouts[idx % layouts.length];
               const span = row[idx % row.length];
               return (
-                <div key={idx} style={{ gridColumn: `span ${span}` }}>
+                <div key={idx} className={`portfolio-item span-${span}`} style={{ gridColumn: `span ${span}` }}>
                   <Placeholder caption={it.c} idx={it.tone} ratio={it.ratio} rounded={4} />
                 </div>
               );
@@ -997,11 +997,11 @@ function Process() {
           Понятный процесс — половина успеха съёмки. Вы знаете, что и когда происходит, и&nbsp;когда получите файлы.
         </p>
 
-        <div style={{
+        <div className="process-grid" style={{
           marginTop: 64, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24,
           position: 'relative',
         }}>
-          <div aria-hidden style={{
+          <div className="process-connector" aria-hidden style={{
             position: 'absolute', left: '8.33%', right: '8.33%', top: 28, height: 1,
             background: 'repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 12px)',
             opacity: .65,
@@ -1064,13 +1064,13 @@ function Trust() {
     <section style={{ padding: '100px 0' }}>
       <div className="container">
         <SectionLabel num="04">Условия и гарантии</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
+        <div className="trust-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
           <SerifH size={56}>
             Прозрачно. <em>Никаких неожиданностей.</em>
           </SerifH>
           <div style={{ display: 'grid', gap: 1, background: 'rgba(42,37,32,.12)', border: '1px solid rgba(42,37,32,.12)' }}>
             {items.map((it) => (
-              <div key={it.k} style={{
+              <div key={it.k} className="trust-card" style={{
                 background: 'var(--bg)',
                 padding: '28px 32px',
                 display: 'grid', gridTemplateColumns: '48px 1fr', gap: 24, alignItems: 'baseline',
@@ -1234,7 +1234,7 @@ function Contact() {
         background: 'radial-gradient(circle at 85% 15%, rgba(255,250,240,.35), transparent 55%), radial-gradient(circle at 10% 90%, rgba(42,37,32,.08), transparent 55%)',
       }} />
       <div className="container" style={{ position: 'relative' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 80, alignItems: 'start' }}>
+        <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 80, alignItems: 'start' }}>
           <div>
             <div style={{
               fontFamily: 'ui-monospace, monospace', fontSize: 11.5,
@@ -1999,9 +1999,9 @@ function LeadsDashboard() {
         </div>
 
         {leads.length > 0 && (
-          <div style={{
+          <div className="leads-stats-grid" style={{
             display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 40,
-          }} className="stats-grid">
+          }}>
             <style>{`
               @media (max-width: 768px) {
                 .stats-grid { grid-template-columns: 1fr 1fr !important; }

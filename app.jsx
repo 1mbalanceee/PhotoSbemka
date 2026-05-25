@@ -116,13 +116,195 @@ function App() {
     <div>
       <style>{`
         .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
-        @media (max-width: 880px) {
-          .container { padding: 0 20px; }
-          .nav-links { display: none !important; }
-        }
         .nav-links a { white-space: nowrap; }
         h1, h2, h3 { font-family: var(--serif); }
         .regalia-title { overflow-wrap: break-word; word-break: normal; hyphens: auto; }
+
+        @media (max-width: 880px) {
+          .container { padding: 0 20px; }
+          .nav-links { display: none !important; }
+
+          /* General section padding reduction for premium mobile breathing room */
+          section {
+            padding: 48px 0 !important;
+          }
+          
+          /* Headers response scales */
+          h1 {
+            font-size: clamp(34px, 8.5vw, 56px) !important;
+            line-height: 1.05 !important;
+            letter-spacing: -0.015em !important;
+          }
+          h2 {
+            font-size: clamp(32px, 8vw, 44px) !important;
+            line-height: 1.1 !important;
+          }
+          h3 {
+            font-size: clamp(22px, 5vw, 28px) !important;
+          }
+
+          /* Hero Collage Grid */
+          .hero-grid {
+            grid-template-columns: 1fr !important;
+            gap: 36px !important;
+            padding: 16px 0 40px !important;
+          }
+          /* Stack the collage images correctly and cleanly below the text */
+          .hero-grid > div:last-child {
+            margin-top: 16px !important;
+            padding-right: 0 !important;
+          }
+
+          /* Hero Single fullscreen aspect ratio override for overlays */
+          .hero-single-wrapper {
+            border-radius: 8px !important;
+          }
+          .hero-single-wrapper > div {
+            aspect-ratio: 3/4 !important; /* Elegant vertical ratio on mobile */
+          }
+          .hero-single-wrapper > div > div:last-child {
+            padding: 24px !important; /* Soft compact padding for text */
+          }
+
+          /* Hero Slider Grid */
+          .hero-slider-grid {
+            grid-template-columns: 1fr !important;
+            gap: 36px !important;
+            padding: 16px 0 40px !important;
+          }
+
+          /* About Grid */
+          .about-grid {
+            grid-template-columns: 1fr !important;
+            gap: 32px !important;
+          }
+          .about-grid > div:first-child {
+            max-width: 320px;
+            margin: 0 auto;
+          }
+          .regalia-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+            background: transparent !important;
+            border: none !important;
+            margin-top: 32px !important;
+          }
+          .regalia-grid > div {
+            background: var(--bg-warm) !important;
+            border: 1px solid rgba(42,37,32,.08) !important;
+            border-radius: 8px !important;
+            padding: 16px 20px !important;
+          }
+
+          /* Process Grid */
+          .process-grid {
+            grid-template-columns: 1fr !important;
+            gap: 28px !important;
+            margin-top: 36px !important;
+          }
+          /* Hide horizontal connector lines */
+          .process-connector {
+            display: none !important;
+          }
+
+          /* Trust Grid */
+          .trust-grid {
+            grid-template-columns: 1fr !important;
+            gap: 32px !important;
+          }
+          .trust-grid > div:last-child {
+            border: none !important;
+            background: transparent !important;
+            gap: 12px !important;
+          }
+          .trust-card {
+            border: 1px solid rgba(42,37,32,.08) !important;
+            border-radius: 8px !important;
+            padding: 20px 24px !important;
+          }
+
+          /* Stories Grid */
+          .stories-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 20px !important;
+          }
+
+          /* Contact Grid */
+          .contact-grid {
+            grid-template-columns: 1fr !important;
+            gap: 40px !important;
+          }
+          .contact-grid > div:first-child h2 {
+            font-size: clamp(34px, 8.5vw, 48px) !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          /* Portfolio Grids */
+          .portfolio-tabs-grid, .portfolio-scroll-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .portfolio-tabs-grid .portfolio-item, .portfolio-scroll-grid .portfolio-item {
+            grid-column: span 1 !important;
+          }
+          /* Let certain portfolio items span full row for rhythmic layout */
+          .portfolio-tabs-grid .portfolio-item.span-7, 
+          .portfolio-tabs-grid .portfolio-item.span-5,
+          .portfolio-scroll-grid .portfolio-item.span-7, 
+          .portfolio-scroll-grid .portfolio-item.span-5,
+          .portfolio-scroll-grid .portfolio-item.span-8 {
+            grid-column: span 2 !important;
+          }
+
+          /* Portfolio Masonry Grid */
+          .portfolio-masonry-grid {
+            column-count: 2 !important;
+            column-gap: 12px !important;
+          }
+
+          /* Leads stats grid */
+          .leads-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+            margin-bottom: 24px !important;
+          }
+        }
+
+        @media (max-width: 600px) {
+          /* Stories 1-column */
+          .stories-grid {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .nav-title {
+            font-size: 16px !important;
+          }
+          .hamburger-btn {
+            width: 36px !important;
+            height: 36px !important;
+          }
+          
+          /* Portfolio Grids 1-column on mobile phones */
+          .portfolio-tabs-grid, .portfolio-scroll-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .portfolio-tabs-grid .portfolio-item, .portfolio-scroll-grid .portfolio-item {
+            grid-column: span 1 !important;
+          }
+
+          .portfolio-masonry-grid {
+            column-count: 1 !important;
+          }
+
+          /* Leads stats grid 1-column */
+          .leads-stats-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
       `}</style>
 
       <Nav />
