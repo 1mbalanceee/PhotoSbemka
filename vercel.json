@@ -1,12 +1,16 @@
 {
   "version": 2,
-  "functions": {
-    "api/leads.js": {
-      "includeFiles": "node_modules/sqlite3/**"
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": "node_modules/sqlite3/**"
+      }
     }
-  },
+  ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/leads.js" },
+    { "source": "/api/(.*)", "destination": "/server.js" },
     { "source": "/admin", "destination": "/index.html" },
     { "source": "/story", "destination": "/index.html" }
   ]

@@ -2,13 +2,26 @@ const express = require('express');
 const { Sequelize, DataTypes } = require('sequelize');
 const path = require('path');
 
+// Force Vercel's static analysis (Node File Trace) to bundle the sqlite3 native module
+try {
+  require('sqlite3');
+} catch (e) {
+  console.warn('sqlite3 native preload warning:', e.message);
+}
+
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+// Determine database path. On Vercel, the file system is read-only except for /tmp.
+const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
+const dbPath = isVercel
+  ? '/tmp/database.sqlite'
+  : path.join(__dirname, 'database.sqlite');
 
 // Initialize Sequelize with SQLite database
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: path.join(__dirname, 'database.sqlite'),
+  storage: dbPath,
   logging: false, // Turn off query logging for cleaner server output
 });
 
@@ -135,4 +148,11 @@ async function start() {
   }
 }
 
-start();
+// Export Express app for Vercel serverless environment
+if (process.env.VERCEL) {
+  // Sync db synchronously for Vercel before requests
+  sequelize.sync().catch(console.error);
+  module.exports = app;
+} else {
+  start();
+}
