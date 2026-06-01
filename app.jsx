@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 // app.jsx — root app + Tweaks wiring + theming
+// Trigger redeployment to activate newly linked Vercel Redis environment variables
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "hero": "collage",
