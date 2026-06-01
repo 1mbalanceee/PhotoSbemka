@@ -593,10 +593,10 @@ const CATEGORIES = [
     id: 'family', label: 'Дети и семья',
     blurb: 'Съёмка в игре, живые эмоции. Дома, на природе, в студии.',
     items: [
-      { src: '/images/MAY_1456.jpg', c: 'утренний завтрак', tone: 0, ratio: '4/5', position: 'left' },
+      { src: '/images/MAY_1456.jpg', c: 'утренний завтрак', tone: 0, ratio: '4/5', position: '20% center' },
       { src: '/images/DSC_3138.JPG', c: 'дочь и папа · студия', tone: 3, ratio: '1/1' },
       { src: '/images/DSC_7568.jpg', c: 'мать и дочь', tone: 2, ratio: '3/4' },
-      { src: '/images/DSC_8146.jpg', c: 'малыш в окне', tone: 5, ratio: '4/5', position: 'right' },
+      { src: '/images/DSC_8146.jpg', c: 'малыш в окне', tone: 5, ratio: '4/5', position: '80% center' },
       { src: '/images/DSC_4154.JPG', c: 'игра в саду', tone: 4, ratio: '16/10' },
       { src: '/images/DSC_2117.jpg', c: 'портрет мамы с младенцем', tone: 1, ratio: '4/5' },
     ],
@@ -629,7 +629,7 @@ const CATEGORIES = [
     items: [
       { src: '/images/DSC_7522.jpg', c: 'утро невесты', tone: 1, ratio: '4/5' },
       { src: '/images/DSC_3949.jpg', c: 'выездная роспись', tone: 0, ratio: '3/2' },
-      { src: '/images/DSC_1065.jpg', c: 'прогулка вдвоём · волга', tone: 3, ratio: '4/5', position: 'left' },
+      { src: '/images/DSC_1065.jpg', c: 'прогулка вдвоём · волга', tone: 3, ratio: '4/5', position: '80% center' },
       { src: '/images/DSC_5362.jpg', c: 'первый танец', tone: 5, ratio: '1/1' },
       { src: '/images/DSC_4502.jpg', c: 'камерная свадьба · ЗАГС', tone: 2, ratio: '3/2' },
     ],
