@@ -21,13 +21,13 @@ export default (req, res) => {
 
   // POST /api/leads — create a new lead
   if (req.method === 'POST' && !leadId) {
-    const { name, contact, kind, when, msg, date } = req.body || {};
+    const { name, contact, kind, when, msg, plan, date } = req.body || {};
     if (!name || !contact) {
       return res.status(400).json({ error: 'Name and contact are required fields.' });
     }
     const lead = {
       id: memoryId++,
-      name, contact, kind, when, msg, date,
+      name, contact, kind, when, msg, plan, date,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

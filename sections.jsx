@@ -94,6 +94,7 @@ function Nav() {
   const links = [
     ['Обо мне', '#about'],
     ['Направления', '#work'],
+    ['Цены', '#pricing'],
     ['Процесс', '#process'],
     ['Истории', '#stories'],
     ['Контакты', '#contact'],
@@ -346,13 +347,13 @@ function HeroCollage({ city }) {
           gap: 14, alignContent: 'start',
         }}>
           <div style={{ gridColumn: '1 / 2', gridRow: '1 / 3', marginTop: 40 }}>
-            <Placeholder caption="hero · семья в свету" idx={0} ratio="3/4" rounded={6} frame />
+            <Placeholder src="/images/DSC_9660-1.jpg" caption="стильная беременность" idx={0} ratio="3/4" rounded={6} frame />
           </div>
           <div>
-            <Placeholder caption="портрет · студия" idx={2} ratio="4/5" rounded={6} frame />
+            <Placeholder src="/images/DSC_9284_1.jpg" caption="портрет в студии" idx={2} ratio="4/5" rounded={6} frame />
           </div>
           <div style={{ marginTop: -28 }}>
-            <Placeholder caption="репортаж · школа" idx={4} ratio="1/1" rounded={6} frame />
+            <Placeholder src="/images/DSC_6314.jpg" caption="семья в свету" idx={4} ratio="1/1" rounded={6} frame />
           </div>
           <div style={{
             position: 'absolute', right: -8, top: -16,
@@ -374,7 +375,7 @@ function HeroSingle({ city }) {
     <section id="top" style={{ padding: '24px 0 80px' }}>
       <div className="container">
         <div className="hero-single-wrapper" style={{ position: 'relative', borderRadius: 12, overflow: 'hidden' }}>
-          <Placeholder caption="hero · полнокадровый снимок · ребёнок в окне, тёплый свет" idx={0} ratio="16/9" rounded={12} />
+          <Placeholder src="/images/DSC_4502.jpg" caption="семейные прогулки в объятиях природы · лето" idx={0} ratio="16/9" rounded={12} />
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(180deg, rgba(20,15,8,.05) 0%, rgba(20,15,8,.55) 100%)',
@@ -428,10 +429,10 @@ function HeroSingle({ city }) {
 
 function HeroSlider({ city }) {
   const slides = [
-    { caption: 'Семья · домашняя съёмка', tone: 0 },
-    { caption: 'Деловой портрет · студия', tone: 2 },
-    { caption: 'Репортаж · школьный праздник', tone: 4 },
-    { caption: 'Камерная свадьба · ЗАГС', tone: 5 },
+    { src: '/images/DSC_9284_1.jpg', caption: 'Семья · В ожидании чуда в закатном лесу', tone: 0 },
+    { src: '/images/DSC_5362.jpg', caption: 'Бизнес · Профессиональный портрет для брендов', tone: 2 },
+    { src: '/images/DSC_6605.jpg', caption: 'Репортаж · Искренние эмоции детских событий', tone: 4 },
+    { src: '/images/MAY_1456.jpg', caption: 'Свадьба · Искренние улыбки в винтажном кабриолете', tone: 5 },
   ];
   const [i, setI] = useState(0);
   useEffect(() => {
@@ -475,7 +476,7 @@ function HeroSlider({ city }) {
                 opacity: idx === i ? 1 : 0,
                 transition: 'opacity .9s ease',
               }}>
-                <Placeholder caption={s.caption} idx={s.tone} ratio="4/5" rounded={10} />
+                <Placeholder src={s.src} caption={s.caption} idx={s.tone} ratio="4/5" rounded={10} />
               </div>
             ))}
             <div style={{
@@ -525,7 +526,7 @@ function About() {
         <SectionLabel num="01">Обо&nbsp;мне · Философия</SectionLabel>
         <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.15fr', gap: 64, alignItems: 'start' }}>
           <div>
-            <Placeholder caption="портрет автора · мягкий свет" idx={1} ratio="4/5" rounded={6} frame />
+            <Placeholder src="/images/avatar.jpg" caption="фотограф Надежда Коновалова" idx={1} ratio="4/5" rounded={6} frame />
             <div style={{ marginTop: 24, paddingLeft: 4 }}>
               <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 22, color: 'var(--ink)' }}>
                 Надежда Коновалова
@@ -592,44 +593,45 @@ const CATEGORIES = [
     id: 'family', label: 'Дети и семья',
     blurb: 'Съёмка в игре, живые эмоции. Дома, на природе, в студии.',
     items: [
-      { c: 'утренний завтрак · семья из 4-х', tone: 0, ratio: '4/5' },
-      { c: 'дочь и папа · парк горького', tone: 3, ratio: '1/1' },
-      { c: 'братья на даче', tone: 2, ratio: '3/4' },
-      { c: 'малыш в окне · домашний свет', tone: 5, ratio: '4/5' },
-      { c: 'игра в саду', tone: 4, ratio: '16/10' },
-      { c: 'портрет мамы с младенцем', tone: 1, ratio: '4/5' },
+      { src: '/images/MAY_1456.jpg', c: 'утренний завтрак', tone: 0, ratio: '4/5', position: 'left' },
+      { src: '/images/DSC_3138.JPG', c: 'дочь и папа · студия', tone: 3, ratio: '1/1' },
+      { src: '/images/DSC_7568.jpg', c: 'мать и дочь', tone: 2, ratio: '3/4' },
+      { src: '/images/DSC_8146.jpg', c: 'малыш в окне', tone: 5, ratio: '4/5', position: 'right' },
+      { src: '/images/DSC_4154.JPG', c: 'игра в саду', tone: 4, ratio: '16/10' },
+      { src: '/images/DSC_2117.jpg', c: 'портрет мамы с младенцем', tone: 1, ratio: '4/5' },
     ],
   },
   {
     id: 'portrait', label: 'Портрет и бизнес',
     blurb: 'Мужской и женский портрет. Контент для соцсетей, лендингов и медиа.',
     items: [
-      { c: 'предприниматель · кофейня', tone: 2, ratio: '3/4' },
-      { c: 'имиджевая съёмка · салон', tone: 1, ratio: '4/5' },
-      { c: 'портрет эксперта · кабинет', tone: 5, ratio: '1/1' },
-      { c: 'женский портрет · окно', tone: 0, ratio: '4/5' },
-      { c: 'команда стартапа', tone: 3, ratio: '16/10' },
+      { src: '/images/DSC_1219.jpg', c: 'предприниматель · кофейня', tone: 2, ratio: '3/4' },
+      { src: '/images/DSC_4671.jpg', c: 'имиджевая съемка · студия', tone: 1, ratio: '4/5' },
+      { src: '/images/DSC_3796.JPG', c: 'портрет эксперта · кабинет', tone: 5, ratio: '1/1' },
+      { src: '/images/DSC_6264.jpg', c: 'женский портрет', tone: 0, ratio: '4/5' },
+      { src: '/images/DSC_7636.jpg', c: 'команда стартапа', tone: 3, ratio: '16/10' },
     ],
   },
   {
     id: 'reportage', label: 'Репортаж',
     blurb: 'Праздники, события, школьные выпускные, корпоративы, садики.',
     items: [
-      { c: 'школьный выпускной · 11 класс', tone: 4, ratio: '3/2' },
-      { c: 'детский сад · выпускной', tone: 0, ratio: '4/5' },
-      { c: 'корпоратив IT-компании', tone: 2, ratio: '1/1' },
-      { c: 'юбилей · банкетный зал', tone: 5, ratio: '4/5' },
-      { c: 'конференция предпринимателей', tone: 1, ratio: '3/2' },
+      { src: '/images/DSC_7260.jpg', c: 'школьный выпускной', tone: 4, ratio: '3/2' },
+      { src: '/images/DSC_8333.JPG', c: 'крещение · церковь', tone: 0, ratio: '4/5' },
+      { src: '/images/DSC_5887.jpg', c: 'корпоратив IT-компании', tone: 2, ratio: '1/1' },
+      { src: '/images/DSC_7057.jpg', c: 'выписка · роддом', tone: 5, ratio: '4/5' },
+      { src: '/images/DSC_0357.JPG', c: 'юбилей · банкетный зал', tone: 1, ratio: '3/2' },
     ],
   },
   {
     id: 'wedding', label: 'Камерные свадьбы',
     blurb: 'ЗАГС и прогулка по вашим пожеланиям. Камерно, без суеты.',
     items: [
-      { c: 'утро невесты', tone: 1, ratio: '4/5' },
-      { c: 'выездная роспись · набережная', tone: 0, ratio: '3/2' },
-      { c: 'прогулка вдвоём · волга', tone: 3, ratio: '4/5' },
-      { c: 'первый танец', tone: 5, ratio: '1/1' },
+      { src: '/images/DSC_7522.jpg', c: 'утро невесты', tone: 1, ratio: '4/5' },
+      { src: '/images/DSC_3949.jpg', c: 'выездная роспись', tone: 0, ratio: '3/2' },
+      { src: '/images/DSC_1065.jpg', c: 'прогулка вдвоём · волга', tone: 3, ratio: '4/5', position: 'left' },
+      { src: '/images/DSC_5362.jpg', c: 'первый танец', tone: 5, ratio: '1/1' },
+      { src: '/images/DSC_4502.jpg', c: 'камерная свадьба · ЗАГС', tone: 2, ratio: '3/2' },
     ],
   },
 ];
@@ -727,7 +729,7 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
           animation: 'lightboxZoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        <Placeholder caption={item.c} idx={item.tone} ratio={item.ratio} rounded={8} frame />
+        <Placeholder src={item.src} caption={item.c} idx={item.tone} ratio={item.ratio} rounded={8} frame imgPosition={item.position} />
         <div style={{
           color: '#FBF7EF', marginTop: 18,
           display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
@@ -816,7 +818,7 @@ function PortfolioTabs() {
           return (
             <div key={idx} className={`portfolio-item span-${span}`} style={{ gridColumn: `span ${span}`, cursor: 'zoom-in' }}
                  onClick={() => setLbIdx(idx)}>
-              <Placeholder caption={it.c} idx={it.tone} ratio={it.ratio} rounded={4} />
+                   <Placeholder src={it.src} caption={it.c} idx={it.tone} ratio={it.ratio} rounded={4} imgPosition={it.position} />
             </div>
           );
         })}
@@ -858,7 +860,7 @@ function PortfolioMasonry() {
         {items.map((it, idx) => (
           <div key={it._key} style={{ breakInside: 'avoid', marginBottom: 14, cursor: 'zoom-in' }}
                onClick={() => setLbIdx(idx)}>
-            <Placeholder caption={it.c} idx={it.tone} ratio={it.ratio} rounded={4} />
+            <Placeholder src={it.src} caption={it.c} idx={it.tone} ratio={it.ratio} rounded={4} imgPosition={it.position} />
             <div style={{ marginTop: 6, fontSize: 11, color: 'var(--muted)', letterSpacing: '.04em' }}>
               {it._label}
             </div>
@@ -911,7 +913,7 @@ function PortfolioScroll() {
               const span = row[idx % row.length];
               return (
                 <div key={idx} className={`portfolio-item span-${span}`} style={{ gridColumn: `span ${span}` }}>
-                  <Placeholder caption={it.c} idx={it.tone} ratio={it.ratio} rounded={4} />
+                  <Placeholder src={it.src} caption={it.c} idx={it.tone} ratio={it.ratio} rounded={4} imgPosition={it.position} />
                 </div>
               );
             })}
@@ -1063,7 +1065,7 @@ function Trust() {
   return (
     <section style={{ padding: '100px 0' }}>
       <div className="container">
-        <SectionLabel num="04">Условия и гарантии</SectionLabel>
+        <SectionLabel num="05">Условия и гарантии</SectionLabel>
         <div className="trust-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
           <SerifH size={56}>
             Прозрачно. <em>Никаких неожиданностей.</em>
@@ -1102,24 +1104,27 @@ function Stories() {
       t: 'Как мы создавали сказку: тематическая съёмка в русских костюмах',
       teaser: 'Подбирали локацию вдоль Волги, шили сарафан под цвет утреннего света, ловили туман на рассвете.',
       tone: 4, ratio: '4/5', read: '6 мин',
+      src: '/images/DSC_1469.JPG',
     },
     {
       tag: 'семья', date: '01 · 2026',
       t: 'Домашняя съёмка с двойняшками: что делать, если дети не сидят на месте',
       teaser: 'Маленький план, много игры и одно правило — не торопить. Что получилось — внутри.',
       tone: 0, ratio: '4/5', read: '4 мин',
+      src: '/images/DSC_4364.jpg',
     },
     {
       tag: 'бизнес', date: '11 · 2025',
       t: 'Деловой портрет для эксперта: как снять «человеческое лицо» бренда',
       teaser: 'Снимали серию для лендинга и соцсетей. Один день, три локации, шесть образов.',
       tone: 2, ratio: '4/5', read: '5 мин',
+      src: '/images/DSC_7246.jpg',
     },
   ];
   return (
     <section id="stories" style={{ padding: '60px 0 120px' }}>
       <div className="container">
-        <SectionLabel num="05">Истории съёмок</SectionLabel>
+        <SectionLabel num="06">Истории съёмок</SectionLabel>
         <div style={{
           display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
           gap: 24, flexWrap: 'wrap', marginBottom: 48,
@@ -1146,7 +1151,7 @@ function Stories() {
               onMouseLeave={(e) => { e.currentTarget.querySelector('.ph').style.transform = 'scale(1)'; }}>
               <div style={{ overflow: 'hidden', borderRadius: 4 }}>
                 <div className="ph" style={{ transition: 'transform .5s ease' }}>
-                  <Placeholder caption={c.t.toLowerCase()} idx={c.tone} ratio={c.ratio} rounded={4} />
+                  <Placeholder src={c.src} caption={c.t.toLowerCase()} idx={c.tone} ratio={c.ratio} rounded={4} grayscale={i === 1} />
                 </div>
               </div>
               <div style={{
@@ -1171,14 +1176,272 @@ function Stories() {
 }
 
 /* ────────────────────────────────────────────────────────────
+   Pricing · Тарифы
+   ──────────────────────────────────────────────────────────── */
+
+function Pricing() {
+  const plans = [
+    {
+      id: 'light',
+      title: 'Лайт',
+      price: '2 500 ₽',
+      desc: 'Прекрасно подходит для индивидуальных портретов, быстрых прогулок или лаконичной семейной сессии.',
+      features: [
+        '30–40 минут съёмки в одной локации',
+        'Помощь с позированием и подбором образа',
+        '15 кадров в авторской ретуши',
+        'Все удачные кадры в цветокоррекции (от 40 шт.)',
+        'Первые 3 кадра в день съёмки',
+        'Онлайн-галерея для просмотра (доступ на 1 месяц)',
+        'Срок сдачи готовых фотографий: 10 дней',
+      ],
+      popular: false,
+    },
+    {
+      id: 'standard',
+      title: 'Стандарт',
+      price: '3 000 ₽',
+      desc: 'Максимальный баланс времени и разнообразия. Самый популярный выбор для семейных историй и репортажей.',
+      features: [
+        '1–1.5 часа съёмки (до 2 локаций)',
+        'Разработка концепции, подбор мудборда',
+        'До 4 образов, помощь в стайлинге одежды',
+        '30 кадров в глубокой детальной ретуши',
+        'Все удачные кадры в цветокоррекции (от 80 шт.)',
+        'Первые 5 кадров в течение 24 часов',
+        'Онлайн-галерея для скачивания (доступ на 3 месяца)',
+        'Срок сдачи готовых фотографий: 7 дней',
+      ],
+      popular: true,
+    },
+    {
+      id: 'custom',
+      title: 'Индивидуальный',
+      price: 'от 5 000 ₽',
+      desc: 'Для масштабных творческих проектов, коммерции, контента брендов или съёмки полного дня.',
+      features: [
+        'Индивидуальный хронометраж и сценарий съёмки',
+        'Разработка уникального визуального стиля под ключ',
+        'Помощь в поиске и бронировании эксклюзивных локаций',
+        'Детальная ретушь и художественная арт-обработка ключевых кадров',
+        'Полное продюсирование съёмочного процесса',
+        'Онлайн-галерея премиум-формата (доступ на 1 год)',
+        'Ускоренный срок сдачи: до 3 дней',
+      ],
+      popular: false,
+    },
+  ];
+
+  return (
+    <section id="pricing" style={{ padding: '100px 0 120px', background: 'var(--bg)' }}>
+      <div className="container">
+        <SectionLabel num="04">Стоимость услуг</SectionLabel>
+        <div style={{
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+          gap: 32, marginBottom: 56, flexWrap: 'wrap',
+        }}>
+          <div>
+            <SerifH size={64}>
+              Понятные тарифы. <em>Без скрытых платежей.</em>
+            </SerifH>
+            <p style={{ maxWidth: 580, fontSize: 17, lineHeight: 1.55, color: 'var(--ink-soft)', marginTop: 24, margin: '24px 0 0' }}>
+              Выберите готовый пакет или расскажите о вашей задумке — я помогу рассчитать индивидуальный вариант под ваш бюджет и задачи.
+            </p>
+          </div>
+        </div>
+
+        <div className="pricing-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 28,
+          alignItems: 'stretch',
+        }}>
+          {plans.map((p) => (
+            <div
+              key={p.id}
+              className={`pricing-card ${p.popular ? 'popular' : ''}`}
+              style={{
+                background: p.popular ? '#F2EAD9' : 'var(--bg-warm)',
+                border: p.popular ? '2px solid var(--accent)' : '1px solid rgba(42,37,32,.1)',
+                borderRadius: 12,
+                padding: '40px 32px 48px',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'relative',
+                boxShadow: p.popular ? '0 16px 40px -20px rgba(187,130,80,.25)' : 'none',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
+              }}
+            >
+              {p.popular && (
+                <div style={{
+                  position: 'absolute',
+                  top: -14,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'var(--accent-dark)',
+                  color: '#fff',
+                  fontSize: 11,
+                  fontFamily: 'ui-monospace, monospace',
+                  fontWeight: 600,
+                  letterSpacing: '.12em',
+                  textTransform: 'uppercase',
+                  padding: '5px 16px',
+                  borderRadius: 20,
+                  boxShadow: '0 4px 10px rgba(0,0,0,.08)',
+                  whiteSpace: 'nowrap',
+                }}>
+                  Популярный выбор
+                </div>
+              )}
+
+              <div style={{ marginBottom: 28 }}>
+                <h3 style={{
+                  fontFamily: 'var(--serif)',
+                  fontSize: 32,
+                  fontWeight: 400,
+                  margin: '0 0 10px',
+                  color: 'var(--ink)',
+                }}>
+                  {p.title}
+                </h3>
+                <p style={{
+                  fontSize: 14,
+                  lineHeight: 1.45,
+                  color: 'var(--ink-soft)',
+                  minHeight: 60,
+                  margin: 0,
+                }}>
+                  {p.desc}
+                </p>
+              </div>
+
+              <div style={{
+                borderBottom: '1px solid rgba(42,37,32,.1)',
+                paddingBottom: 24,
+                marginBottom: 28,
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: 8,
+              }}>
+                <span style={{
+                  fontFamily: 'var(--serif)',
+                  fontSize: 48,
+                  fontWeight: 400,
+                  color: 'var(--ink)',
+                  lineHeight: 1,
+                }}>
+                  {p.price}
+                </span>
+                {p.id !== 'custom' && (
+                  <span style={{
+                    fontSize: 13,
+                    color: 'var(--muted)',
+                    fontFamily: 'var(--sans)',
+                  }}>
+                    за съёмку
+                  </span>
+                )}
+              </div>
+
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: '0 0 40px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 14,
+                flex: 1,
+              }}>
+                {p.features.map((f, idx) => (
+                  <li key={idx} style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 12,
+                    fontSize: 14,
+                    lineHeight: 1.45,
+                    color: 'var(--ink-soft)',
+                  }}>
+                    <span style={{
+                      color: 'var(--accent-dark)',
+                      fontWeight: 700,
+                      fontFamily: 'var(--serif)',
+                      fontSize: 16,
+                      lineHeight: 1,
+                      marginTop: 2,
+                    }}>✓</span>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => {
+                  if (typeof window.__selectPlan === 'function') {
+                    window.__selectPlan(p.id);
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  padding: '14px 24px',
+                  borderRadius: 999,
+                  background: p.popular ? 'var(--ink)' : 'transparent',
+                  color: p.popular ? 'var(--bg)' : 'var(--ink)',
+                  border: p.popular ? 'none' : '1px solid rgba(42,37,32,.25)',
+                  fontFamily: 'var(--sans)',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  if (p.popular) {
+                    e.currentTarget.style.background = 'var(--accent-dark)';
+                  } else {
+                    e.currentTarget.style.background = 'rgba(42,37,32,.04)';
+                    e.currentTarget.style.borderColor = 'var(--ink)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  if (p.popular) {
+                    e.currentTarget.style.background = 'var(--ink)';
+                  } else {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.borderColor = 'rgba(42,37,32,.25)';
+                  }
+                }}
+              >
+                Выбрать этот тариф
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────
    Contact + Footer
    ──────────────────────────────────────────────────────────── */
 
 function Contact() {
-  const [form, setForm] = useState({ name: '', contact: '', kind: 'family', when: '', msg: '' });
+  const [form, setForm] = useState({ name: '', contact: '', kind: 'family', when: '', msg: '', plan: 'no-plan' });
   const [touched, setTouched] = useState({});
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
+  
+  React.useEffect(() => {
+    window.__selectPlan = (planId) => {
+      setForm((f) => ({ ...f, plan: planId }));
+      const el = document.getElementById('contact');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    };
+    return () => { delete window.__selectPlan; };
+  }, []);
+
   const update = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const errors = {
     name: !form.name.trim() ? 'Как вас зовут?' : null,
@@ -1197,6 +1460,7 @@ function Contact() {
       kind: form.kind,
       when: form.when,
       msg: form.msg,
+      plan: form.plan,
       date: new Date().toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }),
     };
 
@@ -1243,7 +1507,7 @@ function Contact() {
               display: 'flex', alignItems: 'center', gap: 10,
             }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--ink)', boxShadow: '0 0 0 4px rgba(42,37,32,.12)' }} />
-              § 06 — Контакты
+              § 07 — Контакты
             </div>
             <h2 style={{
               fontFamily: 'var(--serif)', fontSize: 'clamp(48px, 5.6vw, 80px)', fontWeight: 400,
@@ -1347,6 +1611,27 @@ function Contact() {
                           color: 'var(--ink)', cursor: 'pointer', fontSize: 13,
                           fontFamily: 'var(--sans)',
                         }}>{c.label}</button>
+                    ))}
+                  </div>
+                </Field>
+
+                <Field label="Выберите тариф">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {[
+                      { id: 'no-plan', label: 'Не выбран / Консультация' },
+                      { id: 'light', label: 'Лайт (2 500 ₽)' },
+                      { id: 'standard', label: 'Стандарт (3 000 ₽)' },
+                      { id: 'custom', label: 'Индивидуальный' }
+                    ].map((p) => (
+                      <button type="button" key={p.id}
+                        onClick={() => update('plan', p.id)}
+                        style={{
+                          padding: '9px 14px', borderRadius: 6,
+                          border: '1px solid ' + (form.plan === p.id ? 'var(--accent-dark)' : 'rgba(42,37,32,.18)'),
+                          background: form.plan === p.id ? 'rgba(212,165,116,.22)' : 'transparent',
+                          color: 'var(--ink)', cursor: 'pointer', fontSize: 13,
+                          fontFamily: 'var(--sans)',
+                        }}>{p.label}</button>
                     ))}
                   </div>
                 </Field>
@@ -1533,7 +1818,26 @@ function StoryPage({ id }) {
           <h3>Подготовка и костюм</h3>
           <p>Вместо аренды дешёвых карнавальных нарядов мы решили сшить сарафан с нуля. Ткань — плотный домотканый лён приглушенного брусничного цвета. Никаких кричащих красок: только природные текстуры, которые гармонично смотрятся в кадре и отражают мягкий рассветный свет.</p>
           <div style={{ margin: '32px 0' }}>
-            <Placeholder caption="подготовка · детали кроя сарафана" idx={2} ratio="16/10" rounded={6} />
+            <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', cursor: 'pointer' }}
+                 onClick={() => alert('Здесь будет воспроизводиться видео процесса съёмки!')}>
+              <Placeholder src="/images/DSC_1469.JPG" caption="видео процесса съёмки" ratio="16/10" rounded={6} />
+              <div style={{
+                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(20,15,8,0.25)', pointerEvents: 'none'
+              }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: '50%', background: '#FBF7EF',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 8px 32px rgba(20,15,8,0.3)',
+                  border: '1px solid rgba(255,255,255,0.4)',
+                  paddingLeft: 4,
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--ink)">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
           <h3>Локация и погода</h3>
           <p>Снимали на рассвете на Самарской Луке. Выезд из города был в 3:30 утра. Когда мы приехали на место, над рекой лежал густой молочный туман. Нам оставалось только дождаться солнца. В течение получаса свет менялся каждую минуту — от глубокого синего до нежно-розового.</p>
@@ -1558,7 +1862,7 @@ function StoryPage({ id }) {
           <h3>Забудьте про позирование</h3>
           <p>Мы построили съёмку как череду простых и понятных игр. Сначала мы строили шалаш из пледов, затем устроили шуточную битву подушками, а в конце — пекли печенье на кухне, щедро рассыпая муку. В такие моменты дети полностью забывают про камеру.</p>
           <div style={{ margin: '32px 0' }}>
-            <Placeholder caption="игра · мука и улыбки на кухне" idx={0} ratio="16/10" rounded={6} />
+            <Placeholder src="/images/DSC_4183.jpg" caption="игра в кроватке" ratio="16/10" rounded={6} />
           </div>
           <h3>Световые карманы в доме</h3>
           <p>Вам не нужны профессиональные студийные вспышки. Всё, что мы использовали — это мягкий естественный свет от большого окна. Домашняя обстановка даёт детям чувство безопасности, что позволяет им раскрыться на 100%.</p>
@@ -1581,9 +1885,9 @@ function StoryPage({ id }) {
             «Современный эксперт продает не просто услугу. Он продает ценности, стиль жизни и доверие.»
           </blockquote>
           <h3>Три локации, шесть образов</h3>
-          <p>Для этой съёмки мы подобрали три разноплановые локации в Самаре: лаконичную современную кофейню для неформальных кадров с ноутбуком, строгий кабинет для классического портрета и прогулочный маршрут по старой части города для динамичных уличных кадров.</p>
+          <p>Для этой съёмки мы подобрали три разноплановые локации in Самаре: лаконичную современную кофейню для неформальных кадров с ноутбуком, строгий кабинет для классического портрета и прогулочный маршрут по старой части города для динамичных уличных кадров.</p>
           <div style={{ margin: '32px 0' }}>
-            <Placeholder caption="бизнес-портрет · динамика в городе" idx={5} ratio="16/10" rounded={6} />
+            <Placeholder src="/images/DSC_0428.jpg" caption="деловой портрет · статус в кадре" ratio="16/10" rounded={6} />
           </div>
           <h3>Атмосфера на съёмке</h3>
           <p>Мы много общались, пили кофе и обсуждали проект клиента. Это помогло снять зажимы перед камерой. Когда человек увлечен рассказом о любимом деле, его лицо озаряется настоящим профессиональным драйвом — именно эти моменты я и ловлю.</p>
@@ -1852,6 +2156,16 @@ function LeadsDashboard() {
     return m[id] || id;
   };
 
+  const getPlanLabel = (id) => {
+    const m = {
+      'no-plan': 'Не выбран / Консультация',
+      'light': 'Лайт (2 500 ₽)',
+      'standard': 'Стандарт (3 000 ₽)',
+      'custom': 'Индивидуальный'
+    };
+    return m[id] || 'Не выбран / Консультация';
+  };
+
   if (!isAuthenticated) {
     return (
       <section style={{ padding: '80px 0 120px', background: 'var(--bg)', minHeight: '65vh', display: 'flex', alignItems: 'center' }}>
@@ -2103,6 +2417,9 @@ function LeadsDashboard() {
                     <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Связь:</span>
                     <strong style={{ color: 'var(--ink)', wordBreak: 'break-all' }}>{formatContactLink(l.contact)}</strong>
 
+                    <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Тариф:</span>
+                    <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{getPlanLabel(l.plan)}</span>
+
                     <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Когда:</span>
                     <span style={{ color: 'var(--ink)' }}>{l.when || 'Не указано'}</span>
                   </div>
@@ -2153,5 +2470,5 @@ function dashBtn(danger, highlight = false) {
 }
 
 Object.assign(window, {
-  Nav, Hero, About, Portfolio, Process, Trust, Stories, Contact, Footer, BackToTop, StoryPage, LeadsDashboard,
+  Nav, Hero, About, Portfolio, Process, Trust, Stories, Pricing, Contact, Footer, BackToTop, StoryPage, LeadsDashboard,
 });

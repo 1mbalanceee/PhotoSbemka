@@ -44,7 +44,7 @@ function App() {
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const tp = TYPE_PRESETS[t.type] || TYPE_PRESETS.cormorant;
 
-  const [view, setView] = React.useState('home'); // 'home', 'story', 'leads'
+  const [view, setView] = React.useState('home'); // 'home', 'story', 'leads', 'gallery'
   const [activeStory, setActiveStory] = React.useState(null);
 
   // Sync state with URL query parameters for deep linking
@@ -229,6 +229,15 @@ function App() {
             gap: 20px !important;
           }
 
+          /* Pricing Grid */
+          .pricing-grid {
+            grid-template-columns: 1fr !important;
+            gap: 36px !important;
+          }
+          .pricing-card {
+            padding: 32px 24px 40px !important;
+          }
+
           /* Contact Grid */
           .contact-grid {
             grid-template-columns: 1fr !important;
@@ -309,11 +318,16 @@ function App() {
 
       <Nav />
 
+      {view === 'gallery' && (
+        <ImageGallery />
+      )}
+
       {view === 'home' && (
         <>
           <Hero variant={t.hero} city={t.city} />
           <About />
           <Portfolio layout={t.portfolio} />
+          <Pricing />
           <Process />
           <Trust />
           <Stories />
@@ -378,6 +392,61 @@ function App() {
           onChange={(v) => setTweak('accent', v)}
         />
       </TweaksPanel>
+    </div>
+  );
+}
+
+const IMAGE_FILES = [
+  "DSC_0357.JPG",
+  "DSC_0428.jpg",
+  "DSC_1065.jpg",
+  "DSC_1219.jpg",
+  "DSC_1469.JPG",
+  "DSC_2117.jpg",
+  "DSC_3138.JPG",
+  "DSC_3796.JPG",
+  "DSC_3949.jpg",
+  "DSC_4154.JPG",
+  "DSC_4183.jpg",
+  "DSC_4502.jpg",
+  "DSC_4671.jpg",
+  "DSC_5362.jpg",
+  "DSC_5887.jpg",
+  "DSC_6314.jpg",
+  "DSC_6605.jpg",
+  "DSC_6810.JPG",
+  "DSC_7036.jpg",
+  "DSC_7246.jpg",
+  "DSC_7260.jpg",
+  "DSC_7522.jpg",
+  "DSC_7568.jpg",
+  "DSC_7636.jpg",
+  "DSC_8146.jpg",
+  "DSC_8333.JPG",
+  "DSC_9284_1.jpg",
+  "DSC_9660-1.jpg",
+  "DSC_9746.JPG",
+  "MAY_1456.jpg",
+  "VLhvUz89BTj-9D-OLswfZdSEY6FiFShnzq5zuBbGmYQ2jhWG6i_8XmxtQfP7XTyQUFHzL1Sl0LrSA11KYBE89lSQ (1).jpg"
+];
+
+function ImageGallery() {
+  return (
+    <div style={{ padding: 40, background: '#F6F1E8', fontFamily: 'sans-serif' }}>
+      <h1>Временная Галерея для анализа фотографий</h1>
+      <p>Всего: {IMAGE_FILES.length} изображений. Пожалуйста, проанализируйте каждое изображение и опишите, что на нем изображено.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 30 }}>
+        {IMAGE_FILES.map((name, i) => (
+          <div key={name} style={{ background: '#fff', border: '1px solid #ddd', padding: 15, borderRadius: 8 }}>
+            <div style={{ fontWeight: 'bold', marginBottom: 8 }}>#{i + 1}: {name}</div>
+            <img 
+              src={`/images/${name}`} 
+              alt={name} 
+              style={{ width: '100%', height: 'auto', borderRadius: 4, display: 'block', marginBottom: 10 }} 
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
