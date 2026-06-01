@@ -52,6 +52,40 @@ app.delete('/api/leads', (req, res) => {
   return res.json({ success: true });
 });
 
+// Visits in-memory storage
+let memoryVisits = [];
+
+// 5. Create a new visit
+app.post('/api/visits', (req, res) => {
+  try {
+    const { device, timestamp } = req.body || {};
+    const visit = {
+      id: Date.now() + Math.random().toString(36).substr(2, 5),
+      device: device || 'desktop',
+      timestamp: timestamp || new Date().toISOString()
+    };
+    memoryVisits.unshift(visit);
+    if (memoryVisits.length > 5000) {
+      memoryVisits = memoryVisits.slice(0, 5000);
+    }
+    return res.status(201).json(visit);
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// 6. Get all visits
+app.get('/api/visits', (req, res) => {
+  return res.json(memoryVisits);
+});
+
+// 7. Clear all visits
+app.delete('/api/visits', (req, res) => {
+  memoryVisits = [];
+  return res.json({ success: true });
+});
+
+
 // Serve static files
 app.use(express.static(__dirname));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));

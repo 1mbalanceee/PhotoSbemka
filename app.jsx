@@ -47,6 +47,48 @@ function App() {
   const [view, setView] = React.useState('home'); // 'home', 'story', 'leads', 'gallery'
   const [activeStory, setActiveStory] = React.useState(null);
 
+  // Track visit once per session
+  React.useEffect(() => {
+    try {
+      if (!sessionStorage.getItem('nk_session_tracked')) {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const device = isMobile ? 'mobile' : 'desktop';
+        const timestamp = new Date().toISOString();
+
+        // Local fallback: save visit in admin-accessible localStorage immediately
+        const localVisits = JSON.parse(localStorage.getItem('nk_visits') || '[]');
+        const newVisitId = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const localVisit = {
+          id: newVisitId,
+          device,
+          timestamp
+        };
+        localVisits.unshift(localVisit);
+        localStorage.setItem('nk_visits', JSON.stringify(localVisits.slice(0, 5000)));
+
+        // Server notification
+        fetch('/api/visits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ device, timestamp })
+        })
+        .then(r => {
+          if (r.ok) {
+            sessionStorage.setItem('nk_session_tracked', 'true');
+          }
+        })
+        .catch(err => {
+          console.error('Failed to report visit to server:', err);
+        });
+
+        // Set session flag locally as fallback in all cases to prevent duplicate counting during a single browser session
+        sessionStorage.setItem('nk_session_tracked', 'true');
+      }
+    } catch (e) {
+      console.error('Error tracking session visit:', e);
+    }
+  }, []);
+
   // Sync state with URL query parameters for deep linking
   React.useEffect(() => {
     const handleUrl = () => {

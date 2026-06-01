@@ -2044,6 +2044,11 @@ function LeadsDashboard() {
   };
 
   const [leads, setLeads] = useState([]);
+  const [visits, setVisits] = useState([]);
+  const [activeTab, setActiveTab] = useState('leads'); // 'leads' | 'analytics'
+  const [dateRange, setDateRange] = useState('30days'); // '7days' | '30days' | 'all' | 'custom'
+  const [customStart, setCustomStart] = useState('');
+  const [customEnd, setCustomEnd] = useState('');
 
   const loadLeads = () => {
     fetch('/api/leads')
@@ -2061,11 +2066,90 @@ function LeadsDashboard() {
     });
   };
 
+  const loadVisits = () => {
+    fetch('/api/visits')
+    .then(r => {
+      if (!r.ok) throw new Error('API Error');
+      return r.json();
+    })
+    .then(list => {
+      // Merge with localStorage cached visits to prevent loss on server resets
+      const local = JSON.parse(localStorage.getItem('nk_visits') || '[]');
+      const mergedMap = new Map();
+      
+      local.forEach(v => mergedMap.set(v.id, v));
+      list.forEach(v => mergedMap.set(v.id, v));
+      
+      const mergedList = Array.from(mergedMap.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      setVisits(mergedList);
+      localStorage.setItem('nk_visits', JSON.stringify(mergedList.slice(0, 5000)));
+    })
+    .catch(err => {
+      console.error('Failed to load visits from server, using localStorage:', err);
+      const list = JSON.parse(localStorage.getItem('nk_visits') || '[]');
+      setVisits(list);
+    });
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadLeads();
+      loadVisits();
     }
   }, [isAuthenticated]);
+
+  const generateMockVisits = () => {
+    const list = [];
+    const now = new Date();
+    // Generate visits over past 30 days
+    for (let i = 0; i < 240; i++) {
+      const daysAgo = Math.floor(Math.random() * 30);
+      const hour = Math.floor(Math.random() * 24);
+      const minute = Math.floor(Math.random() * 60);
+      const date = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+      date.setHours(hour, minute, 0, 0);
+
+      // 60-40 split mobile-desktop
+      const device = Math.random() < 0.60 ? 'mobile' : 'desktop';
+      
+      list.push({
+        id: 'mock_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 5),
+        device,
+        timestamp: date.toISOString()
+      });
+    }
+
+    const local = JSON.parse(localStorage.getItem('nk_visits') || '[]');
+    const mergedMap = new Map();
+    local.forEach(v => mergedMap.set(v.id, v));
+    list.forEach(v => mergedMap.set(v.id, v));
+    
+    const mergedList = Array.from(mergedMap.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    setVisits(mergedList);
+    localStorage.setItem('nk_visits', JSON.stringify(mergedList.slice(0, 5000)));
+
+    // Send a single ping to the server
+    fetch('/api/visits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device: 'mobile', timestamp: new Date().toISOString() })
+    }).catch(() => {});
+  };
+
+  const clearAllVisits = () => {
+    if (window.confirm('Вы действительно хотите сбросить всю статистику посещений?')) {
+      fetch('/api/visits', { method: 'DELETE' })
+      .then(() => {
+        setVisits([]);
+        localStorage.setItem('nk_visits', JSON.stringify([]));
+      })
+      .catch(err => {
+        console.error('Failed to clear server visits, resetting locally:', err);
+        setVisits([]);
+        localStorage.setItem('nk_visits', JSON.stringify([]));
+      });
+    }
+  };
 
   const deleteLead = (id) => {
     fetch(`/api/leads/${id}`, { method: 'DELETE' })
@@ -2269,7 +2353,7 @@ function LeadsDashboard() {
 
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-          gap: 24, flexWrap: 'wrap', marginBottom: 40,
+          gap: 24, flexWrap: 'wrap', marginBottom: 24,
           borderBottom: '1px solid rgba(42,37,32,.12)', paddingBottom: 24,
         }}>
           <div>
@@ -2280,164 +2364,547 @@ function LeadsDashboard() {
             }}>
               Панель администратора
             </div>
-            <SerifH size={48}>Поступившие заявки</SerifH>
+            <SerifH size={48}>Панель управления</SerifH>
           </div>
           
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button 
-              onClick={addMockLead}
-              style={dashBtn(false, true)}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,165,116,.18)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(212,165,116,.08)'}
-            >
-              ⚡ Симулировать заявку
-            </button>
-            {leads.length > 0 && (
+            {activeTab === 'leads' ? (
               <>
-                <button onClick={exportJSON} style={dashBtn(false)}>Экспорт в JSON</button>
-                <button onClick={clearAll} style={dashBtn(true)}>Очистить всё</button>
+                <button 
+                  onClick={addMockLead}
+                  style={dashBtn(false, true)}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,165,116,.18)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(212,165,116,.08)'}
+                >
+                  ⚡ Симулировать заявку
+                </button>
+                {leads.length > 0 && (
+                  <>
+                    <button onClick={exportJSON} style={dashBtn(false)}>Экспорт в JSON</button>
+                    <button onClick={clearAll} style={dashBtn(true)}>Очистить всё</button>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={generateMockVisits}
+                  style={dashBtn(false, true)}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,165,116,.18)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(212,165,116,.08)'}
+                >
+                  📊 Сгенерировать демо-визиты
+                </button>
+                {visits.length > 0 && (
+                  <button onClick={clearAllVisits} style={dashBtn(true)}>Сбросить визиты</button>
+                )}
               </>
             )}
             <button onClick={handleLogout} style={dashBtn(true)}>Выйти</button>
           </div>
         </div>
 
-        {leads.length > 0 && (
-          <div className="leads-stats-grid" style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 40,
-          }}>
-            <style>{`
-              @media (max-width: 768px) {
-                .stats-grid { grid-template-columns: 1fr 1fr !important; }
-              }
-            `}</style>
-            {[
-              ['Всего заявок', leads.length],
-              ['Семья и дети', leads.filter(x => x.kind === 'family').length],
-              ['Портрет и бизнес', leads.filter(x => x.kind === 'portrait').length],
-              ['Остальное', leads.filter(x => x.kind !== 'family' && x.kind !== 'portrait').length],
-            ].map(([lbl, val]) => (
-              <div key={lbl} style={{
-                background: 'var(--bg-warm)', padding: '16px 20px', borderRadius: 8,
-                border: '1px solid rgba(42,37,32,.06)',
-              }}>
-                <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '.02em' }}>{lbl}</div>
-                <div style={{ fontFamily: 'var(--serif)', fontSize: 32, color: 'var(--ink)', marginTop: 4 }}>{val}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {leads.length === 0 ? (
-          <div style={{
-            textAlign: 'center', padding: '80px 40px', background: 'var(--bg-warm)',
-            borderRadius: 12, border: '1px dashed rgba(42,37,32,.2)',
-          }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📩</div>
-            <h3 style={{ fontFamily: 'var(--serif)', fontSize: 24, margin: 0, color: 'var(--ink)' }}>
-              Заявок пока нет
-            </h3>
-            <p style={{ color: 'var(--ink-soft)', fontSize: 15, marginTop: 8, maxWidth: 360, margin: '8px auto 24px' }}>
-              Когда клиенты заполнят форму обратной связи на вашем сайте, новые заявки мгновенно отобразятся здесь.
-            </p>
-            <button onClick={addMockLead} style={{
-              padding: '12px 22px', borderRadius: 999, background: 'var(--accent)',
-              color: '#1A140C', border: 0, fontFamily: 'var(--sans)', fontSize: 13.5,
-              fontWeight: 500, cursor: 'pointer', transition: 'all 0.18s ease',
+        {/* Tab Switcher */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 36, borderBottom: '1px solid rgba(42,37,32,.06)', paddingBottom: 16 }}>
+          <button 
+            onClick={() => setActiveTab('leads')}
+            style={{
+              padding: '12px 24px', borderRadius: 8,
+              border: activeTab === 'leads' ? '1px solid var(--ink)' : '1px solid rgba(42,37,32,.12)',
+              background: activeTab === 'leads' ? 'var(--ink)' : 'transparent',
+              color: activeTab === 'leads' ? 'var(--bg)' : 'var(--ink)',
+              fontFamily: 'var(--sans)', fontSize: 14.5, fontWeight: 600,
+              cursor: 'pointer', transition: 'all 0.2s ease',
+              display: 'inline-flex', alignItems: 'center', gap: 8
             }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-            >
-              Создать тестовую заявку
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }} className="leads-grid">
-            <style>{`
-              @media (max-width: 768px) {
-                .leads-grid { grid-template-columns: 1fr !important; }
-              }
-            `}</style>
-            {leads.map((l) => (
-              <div 
-                key={l.id} 
-                style={{
-                  background: 'var(--bg-warm)', borderRadius: 10, padding: 28,
-                  border: '1px solid rgba(42,37,32,.08)',
-                  display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-                  boxShadow: '0 2px 8px rgba(0,0,0,.02)',
-                  position: 'relative',
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                    <div>
-                      <h4 style={{ fontFamily: 'var(--serif)', fontSize: 22, margin: 0, color: 'var(--ink)' }}>
-                        {l.name}
-                      </h4>
-                      <div style={{
-                        display: 'inline-block', background: 'var(--accent-dark)', color: '#fff',
-                        fontSize: 10.5, padding: '2px 8px', borderRadius: 4, marginTop: 6,
-                        fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase',
-                        letterSpacing: '.06em',
-                      }}>
-                        {getCatLabel(l.kind)}
-                      </div>
-                    </div>
-                    
-                    <button 
-                      onClick={() => deleteLead(l.id)}
-                      title="Удалить заявку"
-                      style={{
-                        background: 'transparent', border: 0, color: 'rgba(42,37,32,.4)',
-                        cursor: 'pointer', fontSize: 18, padding: 4, transition: 'color .18s',
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#B14A2D'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(42,37,32,.4)'}
-                    >
-                      ×
-                    </button>
-                  </div>
+          >
+            📋 Заявки ({leads.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab('analytics')}
+            style={{
+              padding: '12px 24px', borderRadius: 8,
+              border: activeTab === 'analytics' ? '1px solid var(--ink)' : '1px solid rgba(42,37,32,.12)',
+              background: activeTab === 'analytics' ? 'var(--ink)' : 'transparent',
+              color: activeTab === 'analytics' ? 'var(--bg)' : 'var(--ink)',
+              fontFamily: 'var(--sans)', fontSize: 14.5, fontWeight: 600,
+              cursor: 'pointer', transition: 'all 0.2s ease',
+              display: 'inline-flex', alignItems: 'center', gap: 8
+            }}
+          >
+            📈 Аналитика посещений ({visits.length})
+          </button>
+        </div>
 
-                  <div style={{
-                    marginTop: 20, borderTop: '1px solid rgba(42,37,32,.06)', paddingTop: 16,
-                    display: 'grid', gridTemplateColumns: '80px 1fr', gap: '8px 12px',
-                    fontSize: 13.5, color: 'var(--ink-soft)',
+        {activeTab === 'leads' ? (
+          /* LEADS TAB CONTENT */
+          <>
+            {leads.length > 0 && (
+              <div className="leads-stats-grid" style={{
+                display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 40,
+              }}>
+                <style>{`
+                  @media (max-width: 768px) {
+                    .leads-stats-grid { grid-template-columns: 1fr 1fr !important; }
+                  }
+                  @media (max-width: 480px) {
+                    .leads-stats-grid { grid-template-columns: 1fr !important; }
+                  }
+                `}</style>
+                {[
+                  ['Всего заявок', leads.length],
+                  ['Семья и дети', leads.filter(x => x.kind === 'family').length],
+                  ['Портрет и бизнес', leads.filter(x => x.kind === 'portrait').length],
+                  ['Остальное', leads.filter(x => x.kind !== 'family' && x.kind !== 'portrait').length],
+                ].map(([lbl, val]) => (
+                  <div key={lbl} style={{
+                    background: 'var(--bg-warm)', padding: '16px 20px', borderRadius: 8,
+                    border: '1px solid rgba(42,37,32,.06)',
                   }}>
-                    <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Связь:</span>
-                    <strong style={{ color: 'var(--ink)', wordBreak: 'break-all' }}>{formatContactLink(l.contact)}</strong>
-
-                    <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Тариф:</span>
-                    <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{getPlanLabel(l.plan)}</span>
-
-                    <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Когда:</span>
-                    <span style={{ color: 'var(--ink)' }}>{l.when || 'Не указано'}</span>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '.02em' }}>{lbl}</div>
+                    <div style={{ fontFamily: 'var(--serif)', fontSize: 32, color: 'var(--ink)', marginTop: 4 }}>{val}</div>
                   </div>
+                ))}
+              </div>
+            )}
 
-                  {l.msg && (
-                    <div style={{
-                      marginTop: 16, background: 'rgba(255,250,240,.4)', padding: '14px 18px',
-                      borderRadius: 6, border: '1px solid rgba(42,37,32,.04)',
-                      fontSize: 16, lineHeight: 1.6, color: 'var(--ink-soft)',
-                      fontFamily: 'var(--serif)', fontStyle: 'italic',
-                    }}>
-                      "{l.msg}"
+            {leads.length === 0 ? (
+              <div style={{
+                textAlign: 'center', padding: '80px 40px', background: 'var(--bg-warm)',
+                borderRadius: 12, border: '1px dashed rgba(42,37,32,.2)',
+              }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>📩</div>
+                <h3 style={{ fontFamily: 'var(--serif)', fontSize: 24, margin: 0, color: 'var(--ink)' }}>
+                  Заявок пока нет
+                </h3>
+                <p style={{ color: 'var(--ink-soft)', fontSize: 15, marginTop: 8, maxWidth: 360, margin: '8px auto 24px' }}>
+                  Когда клиенты заполнят форму обратной связи на вашем сайте, новые заявки мгновенно отобразятся здесь.
+                </p>
+                <button onClick={addMockLead} style={{
+                  padding: '12px 22px', borderRadius: 999, background: 'var(--accent)',
+                  color: '#1A140C', border: 0, fontFamily: 'var(--sans)', fontSize: 13.5,
+                  fontWeight: 500, cursor: 'pointer', transition: 'all 0.18s ease',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  Создать тестовую заявку
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }} className="leads-grid">
+                <style>{`
+                  @media (max-width: 768px) {
+                    .leads-grid { grid-template-columns: 1fr !important; }
+                  }
+                `}</style>
+                {leads.map((l) => (
+                  <div 
+                    key={l.id} 
+                    style={{
+                      background: 'var(--bg-warm)', borderRadius: 10, padding: 28,
+                      border: '1px solid rgba(42,37,32,.08)',
+                      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                      boxShadow: '0 2px 8px rgba(0,0,0,.02)',
+                      position: 'relative',
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                        <div>
+                          <h4 style={{ fontFamily: 'var(--serif)', fontSize: 22, margin: 0, color: 'var(--ink)' }}>
+                            {l.name}
+                          </h4>
+                          <div style={{
+                            display: 'inline-block', background: 'var(--accent-dark)', color: '#fff',
+                            fontSize: 10.5, padding: '2px 8px', borderRadius: 4, marginTop: 6,
+                            fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase',
+                            letterSpacing: '.06em',
+                          }}>
+                            {getCatLabel(l.kind)}
+                          </div>
+                        </div>
+                        
+                        <button 
+                          onClick={() => deleteLead(l.id)}
+                          title="Удалить заявку"
+                          style={{
+                            background: 'transparent', border: 0, color: 'rgba(42,37,32,.4)',
+                            cursor: 'pointer', fontSize: 18, padding: 4, transition: 'color .18s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.color = '#B14A2D'}
+                          onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(42,37,32,.4)'}
+                        >
+                          ×
+                        </button>
+                      </div>
+
+                      <div style={{
+                        marginTop: 20, borderTop: '1px solid rgba(42,37,32,.06)', paddingTop: 16,
+                        display: 'grid', gridTemplateColumns: '80px 1fr', gap: '8px 12px',
+                        fontSize: 13.5, color: 'var(--ink-soft)',
+                      }}>
+                        <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Связь:</span>
+                        <strong style={{ color: 'var(--ink)', wordBreak: 'break-all' }}>{formatContactLink(l.contact)}</strong>
+
+                        <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Тариф:</span>
+                        <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{getPlanLabel(l.plan)}</span>
+
+                        <span style={{ color: 'var(--muted)', fontSize: 11.5, letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Когда:</span>
+                        <span style={{ color: 'var(--ink)' }}>{l.when || 'Не указано'}</span>
+                      </div>
+
+                      {l.msg && (
+                        <div style={{
+                          marginTop: 16, background: 'rgba(255,250,240,.4)', padding: '14px 18px',
+                          borderRadius: 6, border: '1px solid rgba(42,37,32,.04)',
+                          fontSize: 16, lineHeight: 1.6, color: 'var(--ink-soft)',
+                          fontFamily: 'var(--serif)', fontStyle: 'italic',
+                        }}>
+                          "{l.msg}"
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div style={{
-                  marginTop: 20, fontSize: 11, color: 'var(--muted)',
-                  display: 'flex', justifyContent: 'space-between',
-                  fontFamily: 'ui-monospace, monospace', borderTop: '1px solid rgba(42,37,32,.06)',
-                  paddingTop: 12,
-                }}>
-                  <span>ID: {l.id}</span>
-                  <span>{l.date}</span>
+                    <div style={{
+                      marginTop: 20, fontSize: 11, color: 'var(--muted)',
+                      display: 'flex', justifyContent: 'space-between',
+                      fontFamily: 'ui-monospace, monospace', borderTop: '1px solid rgba(42,37,32,.06)',
+                      paddingTop: 12,
+                    }}>
+                      <span>ID: {l.id}</span>
+                      <span>{l.date}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          /* VISIT ANALYTICS TAB CONTENT */
+          <>
+            {/* Filter controls */}
+            <div style={{
+              background: 'var(--bg-warm)', padding: '24px 28px', borderRadius: 12,
+              border: '1px solid rgba(42,37,32,.08)', marginBottom: 36,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              gap: 24, flexWrap: 'wrap'
+            }}>
+              <div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace', marginBottom: 8 }}>
+                  Временной диапазон
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {[
+                    ['7days', '7 дней'],
+                    ['30days', '30 дней'],
+                    ['all', 'За все время'],
+                    ['custom', 'Выбрать период']
+                  ].map(([val, label]) => (
+                    <button
+                      key={val}
+                      onClick={() => setDateRange(val)}
+                      style={{
+                        padding: '6px 14px', borderRadius: 6,
+                        border: '1px solid ' + (dateRange === val ? 'var(--ink)' : 'rgba(42,37,32,.15)'),
+                        background: dateRange === val ? 'var(--ink)' : 'transparent',
+                        color: dateRange === val ? 'var(--bg)' : 'var(--ink)',
+                        fontSize: 12.5, fontFamily: 'var(--sans)', fontWeight: 500,
+                        cursor: 'pointer', transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+
+              {dateRange === 'custom' && (
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', animation: 'fadeIn .2s ease' }}>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--sans)' }}>Начало:</span>
+                    <input 
+                      type="date" 
+                      value={customStart} 
+                      onChange={(e) => setCustomStart(e.target.value)}
+                      style={{
+                        padding: '8px 12px', borderRadius: 6,
+                        border: '1px solid rgba(42,37,32,.18)',
+                        background: '#FBF7EF', color: 'var(--ink)',
+                        fontSize: 13, fontFamily: 'var(--sans)', outline: 'none'
+                      }}
+                    />
+                  </label>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--sans)' }}>Конец:</span>
+                    <input 
+                      type="date" 
+                      value={customEnd} 
+                      onChange={(e) => setCustomEnd(e.target.value)}
+                      style={{
+                        padding: '8px 12px', borderRadius: 6,
+                        border: '1px solid rgba(42,37,32,.18)',
+                        background: '#FBF7EF', color: 'var(--ink)',
+                        fontSize: 13, fontFamily: 'var(--sans)', outline: 'none'
+                      }}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* KPI metrics cards */}
+            <div className="leads-stats-grid" style={{
+              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 36,
+            }}>
+              <style>{`
+                @media (max-width: 768px) {
+                  .stats-grid-analytics { grid-template-columns: 1fr !important; }
+                }
+              `}</style>
+              
+              {/* Total visits */}
+              <div style={{
+                background: 'var(--bg-warm)', padding: '24px 28px', borderRadius: 10,
+                border: '1px solid rgba(42,37,32,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Всего переходов</div>
+                  <div style={{ fontFamily: 'var(--serif)', fontSize: 44, color: 'var(--ink)', marginTop: 8 }}>{filteredVisits.length}</div>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>
+                  Показано за выбранный интервал времени
+                </div>
+              </div>
+
+              {/* PC / Desktop visits */}
+              <div style={{
+                background: 'var(--bg-warm)', padding: '24px 28px', borderRadius: 10,
+                border: '1px solid rgba(42,37,32,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Визиты с ПК (Desktop)</div>
+                  <div style={{ fontFamily: 'var(--serif)', fontSize: 44, color: 'var(--ink)', marginTop: 8 }}>
+                    {filteredVisits.filter(v => v.device !== 'mobile').length}
+                    <span style={{ fontSize: 16, color: 'var(--muted)', marginLeft: 8, fontFamily: 'var(--sans)' }}>
+                      ({filteredVisits.length > 0 ? Math.round((filteredVisits.filter(v => v.device !== 'mobile').length / filteredVisits.length) * 100) : 0}%)
+                    </span>
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 8, height: 8, background: 'var(--ink)', borderRadius: '50%' }} /> Стационарные компьютеры и ноутбуки
+                </div>
+              </div>
+
+              {/* Mobile visits */}
+              <div style={{
+                background: 'var(--bg-warm)', padding: '24px 28px', borderRadius: 10,
+                border: '1px solid rgba(42,37,32,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '.02em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Мобильные визиты (Mobile)</div>
+                  <div style={{ fontFamily: 'var(--serif)', fontSize: 44, color: 'var(--ink)', marginTop: 8 }}>
+                    {filteredVisits.filter(v => v.device === 'mobile').length}
+                    <span style={{ fontSize: 16, color: 'var(--accent-dark)', marginLeft: 8, fontFamily: 'var(--sans)' }}>
+                      ({filteredVisits.length > 0 ? Math.round((filteredVisits.filter(v => v.device === 'mobile').length / filteredVisits.length) * 100) : 0}%)
+                    </span>
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%' }} /> Смартфоны и планшеты
+                </div>
+              </div>
+            </div>
+
+            {/* Visual ratio bar */}
+            {filteredVisits.length > 0 && (
+              <div style={{
+                background: 'var(--bg-warm)', padding: '24px 28px', borderRadius: 10,
+                border: '1px solid rgba(42,37,32,.06)', marginBottom: 36
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontFamily: 'var(--sans)', color: 'var(--ink)', fontWeight: 600 }}>
+                  <span>Распределение устройств</span>
+                  <span style={{ display: 'flex', gap: 16 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 10, height: 10, background: 'var(--ink)', borderRadius: 2 }} />
+                      ПК: {Math.round((filteredVisits.filter(v => v.device !== 'mobile').length / filteredVisits.length) * 100)}%
+                    </span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 10, height: 10, background: 'var(--accent)', borderRadius: 2 }} />
+                      Мобильные: {Math.round((filteredVisits.filter(v => v.device === 'mobile').length / filteredVisits.length) * 100)}%
+                    </span>
+                  </span>
+                </div>
+                <div style={{
+                  background: 'rgba(42,37,32,.08)', height: 12, borderRadius: 999,
+                  overflow: 'hidden', display: 'flex', marginTop: 16
+                }}>
+                  <div 
+                    style={{
+                      background: 'var(--ink)',
+                      width: `${Math.round((filteredVisits.filter(v => v.device !== 'mobile').length / filteredVisits.length) * 100)}%`,
+                      height: '100%',
+                      transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  />
+                  <div 
+                    style={{
+                      background: 'var(--accent)',
+                      width: `${Math.round((filteredVisits.filter(v => v.device === 'mobile').length / filteredVisits.length) * 100)}%`,
+                      height: '100%',
+                      transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Daily visits chronological chart */}
+            <div style={{
+              background: 'var(--bg-warm)', padding: '32px 36px', borderRadius: 12,
+              border: '1px solid rgba(42,37,32,.06)', marginBottom: 36
+            }}>
+              <h3 style={{ fontFamily: 'var(--serif)', fontSize: 22, color: 'var(--ink)', margin: '0 0 8px' }}>
+                Динамика переходов по дням
+              </h3>
+              <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 28px', fontFamily: 'var(--sans)' }}>
+                Количество переходов на сайт (разбивка: <span style={{ color: 'var(--ink)', fontWeight: 600 }}>темный — ПК</span>, <span style={{ color: 'var(--accent-dark)', fontWeight: 600 }}>песочный — Мобилка</span>)
+              </p>
+
+              {dailyStats.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)', fontStyle: 'italic', fontSize: 14 }}>
+                  📭 Нет посещений за выбранный период
+                </div>
+              ) : (
+                <div style={{ overflowX: 'auto', paddingBottom: 12, marginRight: -8, marginLeft: -8 }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'space-between',
+                    gap: 16,
+                    height: 200,
+                    padding: '20px 10px 10px',
+                    borderBottom: '2px solid rgba(42,37,32,.12)',
+                    minWidth: Math.max(dailyStats.length * 44, 400), 
+                  }}>
+                    {dailyStats.map(day => {
+                      const heightPct = (day.total / maxDayVisits) * 100;
+                      const mobileHeight = (day.mobile / day.total) * 100;
+                      const desktopHeight = 100 - mobileHeight;
+                      
+                      return (
+                        <div key={day.dateStr} style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          flex: 1,
+                          height: '100%',
+                        }}>
+                          {/* Visual Bar Stack */}
+                          <div style={{
+                            width: 22,
+                            height: 150,
+                            display: 'flex',
+                            flexDirection: 'column-reverse',
+                            borderRadius: '4px 4px 0 0',
+                            overflow: 'hidden',
+                            background: 'rgba(42,37,32,.03)',
+                            position: 'relative',
+                            cursor: 'pointer',
+                            transition: 'transform 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.transform = 'scaleX(1.15)'}
+                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scaleX(1)'}
+                          title={`${day.label}: всего ${day.total} визитов (${day.desktop} ПК, ${day.mobile} мобилка)`}
+                          >
+                            {/* Stack wrapper */}
+                            <div 
+                              style={{
+                                height: `${heightPct}%`,
+                                width: '100%',
+                                display: 'flex',
+                                flexDirection: 'column-reverse',
+                              }}
+                            >
+                              {day.mobile > 0 && (
+                                <div style={{ height: `${mobileHeight}%`, background: 'var(--accent)' }} />
+                              )}
+                              {day.desktop > 0 && (
+                                <div style={{ height: `${desktopHeight}%`, background: 'var(--ink)' }} />
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Label */}
+                          <div style={{
+                            fontSize: 10,
+                            color: 'var(--muted)',
+                            marginTop: 10,
+                            whiteSpace: 'nowrap',
+                            fontFamily: 'ui-monospace, monospace',
+                            fontWeight: 500
+                          }}>
+                            {day.label}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Recent logs */}
+            <div style={{
+              background: 'var(--bg-warm)', padding: '32px 36px', borderRadius: 12,
+              border: '1px solid rgba(42,37,32,.06)'
+            }}>
+              <h3 style={{ fontFamily: 'var(--serif)', fontSize: 22, color: 'var(--ink)', margin: '0 0 24px' }}>
+                Журнал последних переходов
+              </h3>
+              
+              {filteredVisits.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--muted)', fontStyle: 'italic', fontSize: 13.5 }}>
+                  Журнал пуст
+                </div>
+              ) : (
+                <div style={{ maxHeight: 300, overflowY: 'auto', border: '1px solid rgba(42,37,32,.08)', borderRadius: 8 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5, textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: '#F4ECE0', borderBottom: '1px solid rgba(42,37,32,.12)', color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+                        <th style={{ padding: '12px 18px' }}>Время визита</th>
+                        <th style={{ padding: '12px 18px' }}>Устройство</th>
+                        <th style={{ padding: '12px 18px' }}>Идентификатор</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredVisits.slice(0, 50).map((v) => (
+                        <tr key={v.id} style={{ borderBottom: '1px solid rgba(42,37,32,.05)', transition: 'background 0.15s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = '#FAF5EB'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                          <td style={{ padding: '12px 18px', color: 'var(--ink)' }}>
+                            {new Date(v.timestamp).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </td>
+                          <td style={{ padding: '12px 18px' }}>
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 6,
+                              padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600,
+                              background: v.device === 'mobile' ? 'rgba(212,165,116,.15)' : 'rgba(42,37,32,.06)',
+                              color: v.device === 'mobile' ? 'var(--accent-dark)' : 'var(--ink)',
+                              fontFamily: 'var(--sans)'
+                            }}>
+                              {v.device === 'mobile' ? '📱 Мобилка' : '💻 ПК / Desktop'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 18px', color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11.5 }}>
+                            {v.id}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </section>
