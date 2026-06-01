@@ -147,7 +147,7 @@ function App() {
           .hero-grid {
             grid-template-columns: 1fr !important;
             gap: 36px !important;
-            padding: 16px 0 40px !important;
+            padding: 16px 20px 40px !important;
           }
           /* Stack the collage images correctly and cleanly below the text */
           .hero-grid > div:last-child {
@@ -170,7 +170,7 @@ function App() {
           .hero-slider-grid {
             grid-template-columns: 1fr !important;
             gap: 36px !important;
-            padding: 16px 0 40px !important;
+            padding: 16px 20px 40px !important;
           }
 
           /* About Grid */

@@ -1111,7 +1111,7 @@ function Stories() {
       t: 'Домашняя съёмка с двойняшками: что делать, если дети не сидят на месте',
       teaser: 'Маленький план, много игры и одно правило — не торопить. Что получилось — внутри.',
       tone: 0, ratio: '4/5', read: '4 мин',
-      src: '/images/DSC_4364.jpg',
+      src: '/images/DSC_7150.jpg',
     },
     {
       tag: 'бизнес', date: '11 · 2025',
@@ -1522,12 +1522,11 @@ function Contact() {
 
             <div style={{ marginTop: 40, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
-                ['Telegram', '@nadyakonovalova', 'tg'],
-                ['ВКонтакте', 'vk.com/nadya.photo', 'vk'],
-                ['Почта', 'hello@nadyakonovalova.ru', '@'],
-                ['Телефон', '+7 (846) 000-00-00', '☎'],
-              ].map(([k, v, ic]) => (
-                <a key={k} href="#" style={{
+                ['Telegram', '@NADIN_FOTO', 'tg', 'https://t.me/NADIN_FOTO'],
+                ['ВКонтакте', 'vk.com/nadin_foto', 'vk', 'https://vk.com/nadin_foto'],
+                ['Телефон', '+7 (917) 140-34-69', '☎', 'tel:+79171403469'],
+              ].map(([k, v, ic, url]) => (
+                <a key={k} href={url} target={k !== 'Телефон' ? "_blank" : undefined} rel="noopener noreferrer" style={{
                   display: 'flex', alignItems: 'center', gap: 16, textDecoration: 'none', color: 'var(--ink)',
                   padding: '14px 18px',
                   background: 'rgba(255,250,240,.4)',
@@ -1743,7 +1742,6 @@ function Footer() {
           <span>© 2026 Надежда Коновалова · Фотограф в Самаре</span>
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span>Самозанятость · ИНН 63ХХХХХХХХХХ</span>
           <button 
             onClick={() => window.__navigate('leads')}
             style={{ background: 'transparent', border: 0, padding: 0, color: 'inherit', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}
@@ -1862,7 +1860,7 @@ function StoryPage({ id }) {
           <h3>Забудьте про позирование</h3>
           <p>Мы построили съёмку как череду простых и понятных игр. Сначала мы строили шалаш из пледов, затем устроили шуточную битву подушками, а в конце — пекли печенье на кухне, щедро рассыпая муку. В такие моменты дети полностью забывают про камеру.</p>
           <div style={{ margin: '32px 0' }}>
-            <Placeholder src="/images/DSC_4183.jpg" caption="игра в кроватке" ratio="16/10" rounded={6} />
+            <Placeholder src="/images/DSC_7263.jpg" caption="игра в кроватке" ratio="16/10" rounded={6} grayscale />
           </div>
           <h3>Световые карманы в доме</h3>
           <p>Вам не нужны профессиональные студийные вспышки. Всё, что мы использовали — это мягкий естественный свет от большого окна. Домашняя обстановка даёт детям чувство безопасности, что позволяет им раскрыться на 100%.</p>
