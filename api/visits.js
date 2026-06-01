@@ -1,4 +1,6 @@
-// Simple in-memory visits storage for Vercel serverless functions with optional Vercel KV support
+import { createClient } from 'redis';
+
+// Simple in-memory visits storage for Vercel serverless functions with optional Redis support
 let memoryVisits = [];
 
 export default async (req, res) => {
@@ -11,36 +13,48 @@ export default async (req, res) => {
     return res.status(200).end();
   }
 
-  // Helper to load visits from Vercel KV or fall back to RAM
-  const getVisits = async () => {
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+  // Helper to connect to Redis
+  const getRedisClient = async () => {
+    const redisUrl = process.env.STORAGE_SBEMKA_REDIS_URL || process.env.REDIS_URL;
+    if (redisUrl) {
       try {
-        const response = await fetch(`${process.env.KV_REST_API_URL}/get/visits`, {
-          headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
-        });
-        const data = await response.json();
-        return JSON.parse(data.result || '[]');
+        const client = createClient({ url: redisUrl });
+        client.on('error', err => console.error('Redis Client Error', err));
+        await client.connect();
+        return client;
       } catch (err) {
-        console.error('Vercel KV read error:', err);
+        console.error('Failed to create or connect Redis client:', err);
+      }
+    }
+    return null;
+  };
+
+  // Helper to load visits from Redis or fall back to RAM
+  const getVisits = async () => {
+    const client = await getRedisClient();
+    if (client) {
+      try {
+        const data = await client.get('visits');
+        await client.disconnect();
+        return JSON.parse(data || '[]');
+      } catch (err) {
+        console.error('Redis read visits error:', err);
+        try { await client.disconnect(); } catch (e) {}
       }
     }
     return memoryVisits;
   };
 
-  // Helper to save visits to Vercel KV and RAM
+  // Helper to save visits to Redis and RAM
   const saveVisits = async (list) => {
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    const client = await getRedisClient();
+    if (client) {
       try {
-        await fetch(`${process.env.KV_REST_API_URL}/set/visits`, {
-          method: 'POST',
-          headers: { 
-            Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(list)
-        });
+        await client.set('visits', JSON.stringify(list));
+        await client.disconnect();
       } catch (err) {
-        console.error('Vercel KV write error:', err);
+        console.error('Redis write visits error:', err);
+        try { await client.disconnect(); } catch (e) {}
       }
     }
     memoryVisits = list;
@@ -58,7 +72,7 @@ export default async (req, res) => {
     const currentVisits = await getVisits();
     currentVisits.unshift(newVisit);
     
-    // Cap at 3000 visits to optimize free storage tier
+    // Cap at 3000 visits to optimize storage space
     const capped = currentVisits.slice(0, 3000);
     await saveVisits(capped);
     

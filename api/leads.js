@@ -1,4 +1,6 @@
-// Simple in-memory leads storage for Vercel serverless functions with optional Vercel KV support
+import { createClient } from 'redis';
+
+// Simple in-memory leads storage for Vercel serverless functions with optional Redis support
 let memoryLeads = [];
 
 export default async (req, res) => {
@@ -16,36 +18,48 @@ export default async (req, res) => {
   const pathParts = url.pathname.split('/').filter(Boolean); // ["api", "leads", "123"]
   const leadId = pathParts.length === 3 ? pathParts[2] : null;
 
-  // Helper to load leads from Vercel KV or fall back to RAM
-  const getLeads = async () => {
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+  // Helper to connect to Redis
+  const getRedisClient = async () => {
+    const redisUrl = process.env.STORAGE_SBEMKA_REDIS_URL || process.env.REDIS_URL;
+    if (redisUrl) {
       try {
-        const response = await fetch(`${process.env.KV_REST_API_URL}/get/leads`, {
-          headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
-        });
-        const data = await response.json();
-        return JSON.parse(data.result || '[]');
+        const client = createClient({ url: redisUrl });
+        client.on('error', err => console.error('Redis Client Error', err));
+        await client.connect();
+        return client;
       } catch (err) {
-        console.error('Vercel KV read error:', err);
+        console.error('Failed to create or connect Redis client:', err);
+      }
+    }
+    return null;
+  };
+
+  // Helper to load leads from Redis or fall back to RAM
+  const getLeads = async () => {
+    const client = await getRedisClient();
+    if (client) {
+      try {
+        const data = await client.get('leads');
+        await client.disconnect();
+        return JSON.parse(data || '[]');
+      } catch (err) {
+        console.error('Redis read leads error:', err);
+        try { await client.disconnect(); } catch (e) {}
       }
     }
     return memoryLeads;
   };
 
-  // Helper to save leads to Vercel KV and RAM
+  // Helper to save leads to Redis and RAM
   const saveLeads = async (list) => {
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    const client = await getRedisClient();
+    if (client) {
       try {
-        await fetch(`${process.env.KV_REST_API_URL}/set/leads`, {
-          method: 'POST',
-          headers: { 
-            Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(list)
-        });
+        await client.set('leads', JSON.stringify(list));
+        await client.disconnect();
       } catch (err) {
-        console.error('Vercel KV write error:', err);
+        console.error('Redis write leads error:', err);
+        try { await client.disconnect(); } catch (e) {}
       }
     }
     memoryLeads = list;
