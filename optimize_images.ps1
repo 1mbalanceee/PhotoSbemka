@@ -1,7 +1,7 @@
 Add-Type -AssemblyName System.Drawing
 
 # Folder containing images
-$imagesDir = "c:\Users\PC\Downloads\FotoSbemka\images"
+$imagesDir = "c:\Users\PC\Downloads\FotoSbemka\public\images"
 $files = Get-ChildItem -Path $imagesDir -Filter "*.*" -File
 
 # Setup JPEG quality encoder parameters
