@@ -2245,14 +2245,6 @@ function LeadsDashboard() {
                 Войти в панель →
               </button>
             </form>
-            
-            <div style={{
-              marginTop: 24, fontSize: 11.5, color: 'var(--muted)',
-              fontFamily: 'ui-monospace, monospace', padding: '10px',
-              borderTop: '1px solid rgba(42,37,32,.06)',
-            }}>
-              тест-логин: <span style={{ color: 'var(--accent-dark)' }}>nadya</span> / пароль: <span style={{ color: 'var(--accent-dark)' }}>lovephoto</span>
-            </div>
           </div>
         </div>
       </section>
