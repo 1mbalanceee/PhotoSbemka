@@ -1799,6 +1799,7 @@ function BackToTop() {
 }
 
 function StoryPage({ id }) {
+  const [playVideo, setPlayVideo] = useState(false);
   const storyData = [
     {
       title: 'Как мы создавали сказку: тематическая съёмка в русских костюмах',
@@ -1816,26 +1817,38 @@ function StoryPage({ id }) {
           <h3>Подготовка и костюм</h3>
           <p>Вместо аренды дешёвых карнавальных нарядов мы решили сшить сарафан с нуля. Ткань — плотный домотканый лён приглушенного брусничного цвета. Никаких кричащих красок: только природные текстуры, которые гармонично смотрятся в кадре и отражают мягкий рассветный свет.</p>
           <div style={{ margin: '32px 0' }}>
-            <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', cursor: 'pointer' }}
-                 onClick={() => alert('Здесь будет воспроизводиться видео процесса съёмки!')}>
-              <Placeholder src="/images/DSC_1469.JPG" caption="видео процесса съёмки" ratio="16/10" rounded={6} />
-              <div style={{
-                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'rgba(20,15,8,0.25)', pointerEvents: 'none'
-              }}>
+            {!playVideo ? (
+              <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', cursor: 'pointer' }}
+                   onClick={() => setPlayVideo(true)}>
+                <Placeholder src="/images/DSC_1469.JPG" caption="видео процесса съёмки" ratio="16/10" rounded={6} />
                 <div style={{
-                  width: 64, height: 64, borderRadius: '50%', background: '#FBF7EF',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 8px 32px rgba(20,15,8,0.3)',
-                  border: '1px solid rgba(255,255,255,0.4)',
-                  paddingLeft: 4,
+                  position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(20,15,8,0.25)', pointerEvents: 'none'
                 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--ink)">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+                  <div style={{
+                    width: 64, height: 64, borderRadius: '50%', background: '#FBF7EF',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 8px 32px rgba(20,15,8,0.3)',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    paddingLeft: 4,
+                  }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--ink)">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', background: '#000', aspectRatio: '16/10' }}>
+                <video 
+                  src="/images/video_for_story.mp4" 
+                  controls 
+                  autoPlay 
+                  preload="auto"
+                  style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
+                />
+              </div>
+            )}
           </div>
           <h3>Локация и погода</h3>
           <p>Снимали на рассвете на Самарской Луке. Выезд из города был в 3:30 утра. Когда мы приехали на место, над рекой лежал густой молочный туман. Нам оставалось только дождаться солнца. В течение получаса свет менялся каждую минуту — от глубокого синего до нежно-розового.</p>
@@ -2939,12 +2952,23 @@ function LeadsDashboard() {
                 </div>
               ) : (
                 <div style={{ maxHeight: 300, overflowY: 'auto', border: '1px solid rgba(42,37,32,.08)', borderRadius: 8 }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5, textAlign: 'left' }}>
+                  <style>{`
+                    @media (max-width: 600px) {
+                      .visits-table th, .visits-table td {
+                        padding: 8px 10px !important;
+                        font-size: 12px !important;
+                      }
+                      .visits-table .col-id {
+                        display: none !important;
+                      }
+                    }
+                  `}</style>
+                  <table className="visits-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5, textAlign: 'left' }}>
                     <thead>
                       <tr style={{ background: '#F4ECE0', borderBottom: '1px solid rgba(42,37,32,.12)', color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em' }}>
                         <th style={{ padding: '12px 18px' }}>Время визита</th>
                         <th style={{ padding: '12px 18px' }}>Устройство</th>
-                        <th style={{ padding: '12px 18px' }}>Идентификатор</th>
+                        <th className="col-id" style={{ padding: '12px 18px' }}>Идентификатор</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2964,7 +2988,7 @@ function LeadsDashboard() {
                               {v.device === 'mobile' ? '📱 Мобилка' : '💻 ПК / Desktop'}
                             </span>
                           </td>
-                          <td style={{ padding: '12px 18px', color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11.5 }}>
+                          <td className="col-id" style={{ padding: '12px 18px', color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11.5 }}>
                             {v.id}
                           </td>
                         </tr>
