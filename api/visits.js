@@ -1,7 +1,7 @@
-// Simple in-memory visits storage for Vercel serverless functions
+// Simple in-memory visits storage for Vercel serverless functions with optional Vercel KV support
 let memoryVisits = [];
 
-export default (req, res) => {
+export default async (req, res) => {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
@@ -11,6 +11,41 @@ export default (req, res) => {
     return res.status(200).end();
   }
 
+  // Helper to load visits from Vercel KV or fall back to RAM
+  const getVisits = async () => {
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+      try {
+        const response = await fetch(`${process.env.KV_REST_API_URL}/get/visits`, {
+          headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
+        });
+        const data = await response.json();
+        return JSON.parse(data.result || '[]');
+      } catch (err) {
+        console.error('Vercel KV read error:', err);
+      }
+    }
+    return memoryVisits;
+  };
+
+  // Helper to save visits to Vercel KV and RAM
+  const saveVisits = async (list) => {
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+      try {
+        await fetch(`${process.env.KV_REST_API_URL}/set/visits`, {
+          method: 'POST',
+          headers: { 
+            Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(list)
+        });
+      } catch (err) {
+        console.error('Vercel KV write error:', err);
+      }
+    }
+    memoryVisits = list;
+  };
+
   // POST /api/visits — record a visit
   if (req.method === 'POST') {
     const { device, timestamp } = req.body || {};
@@ -19,23 +54,26 @@ export default (req, res) => {
       device: device || 'desktop',
       timestamp: timestamp || new Date().toISOString()
     };
-    memoryVisits.unshift(newVisit);
     
-    // Keep max 5000 visits to prevent memory leak
-    if (memoryVisits.length > 5000) {
-      memoryVisits = memoryVisits.slice(0, 5000);
-    }
+    const currentVisits = await getVisits();
+    currentVisits.unshift(newVisit);
+    
+    // Cap at 3000 visits to optimize free storage tier
+    const capped = currentVisits.slice(0, 3000);
+    await saveVisits(capped);
+    
     return res.status(201).json(newVisit);
   }
 
   // GET /api/visits — retrieve all visits
   if (req.method === 'GET') {
-    return res.status(200).json(memoryVisits);
+    const currentVisits = await getVisits();
+    return res.status(200).json(currentVisits);
   }
 
   // DELETE /api/visits — clear all visits
   if (req.method === 'DELETE') {
-    memoryVisits = [];
+    await saveVisits([]);
     return res.status(200).json({ success: true });
   }
 
