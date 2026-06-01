@@ -2335,6 +2335,76 @@ function LeadsDashboard() {
     );
   }
 
+  const getFilteredVisits = () => {
+    const now = new Date();
+    return visits.filter(v => {
+      if (!v.timestamp) return false;
+      const vDate = new Date(v.timestamp);
+      if (isNaN(vDate.getTime())) return false;
+      
+      if (dateRange === '7days') {
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return vDate >= sevenDaysAgo;
+      }
+      if (dateRange === '30days') {
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return vDate >= thirtyDaysAgo;
+      }
+      if (dateRange === 'custom') {
+        const start = customStart ? new Date(customStart) : null;
+        const end = customEnd ? new Date(customEnd) : null;
+        if (start && end) {
+          const endDay = new Date(end);
+          endDay.setHours(23, 59, 59, 999);
+          return vDate >= start && vDate <= endDay;
+        }
+        if (start) return vDate >= start;
+        if (end) {
+          const endDay = new Date(end);
+          endDay.setHours(23, 59, 59, 999);
+          return vDate <= endDay;
+        }
+      }
+      return true; // 'all'
+    });
+  };
+
+  const filteredVisits = getFilteredVisits();
+
+  const getDailyStats = () => {
+    const counts = {};
+    filteredVisits.forEach(v => {
+      if (!v.timestamp) return;
+      const dateStr = v.timestamp.slice(0, 10);
+      if (!counts[dateStr]) {
+        counts[dateStr] = { mobile: 0, desktop: 0, total: 0 };
+      }
+      if (v.device === 'mobile') {
+        counts[dateStr].mobile += 1;
+      } else {
+        counts[dateStr].desktop += 1;
+      }
+      counts[dateStr].total += 1;
+    });
+
+    const sortedDates = Object.keys(counts).sort((a, b) => new Date(a) - new Date(b));
+    
+    return sortedDates.map(dateStr => {
+      const date = new Date(dateStr);
+      const label = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+      return {
+        dateStr,
+        label,
+        mobile: counts[dateStr].mobile,
+        desktop: counts[dateStr].desktop,
+        total: counts[dateStr].total
+      };
+    });
+  };
+
+  const dailyStats = getDailyStats();
+  const maxDayVisits = dailyStats.reduce((max, day) => Math.max(max, day.total), 0) || 1;
+
   return (
     <section style={{ padding: '40px 0 100px', background: 'var(--bg)' }}>
       <div className="container">
