@@ -18,7 +18,7 @@ export default async (req, res) => {
 
   // DIAGNOSTIC ENDPOINT
   if (req.method === 'GET' && url.searchParams.get('test') === 'true') {
-    const redisUrl = process.env.STORAGE_SBEMKA_REDIS_URL || process.env.REDIS_URL;
+    const redisUrl = process.env.KV_URL || process.env.STORAGE_SBEMKA_REDIS_URL || process.env.REDIS_URL;
     const envKeys = Object.keys(process.env).filter(k => 
       k.toLowerCase().includes('redis') || 
       k.toLowerCase().includes('storage') ||
@@ -70,7 +70,7 @@ export default async (req, res) => {
 
   // Helper to connect to Redis
   const getRedisClient = async () => {
-    const redisUrl = process.env.STORAGE_SBEMKA_REDIS_URL || process.env.REDIS_URL;
+    const redisUrl = process.env.KV_URL || process.env.STORAGE_SBEMKA_REDIS_URL || process.env.REDIS_URL;
     if (redisUrl) {
       try {
         const client = createClient({ 

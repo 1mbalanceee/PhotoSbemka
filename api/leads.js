@@ -20,7 +20,7 @@ export default async (req, res) => {
 
   // Helper to connect to Redis
   const getRedisClient = async () => {
-    const redisUrl = process.env.STORAGE_SBEMKA_REDIS_URL || process.env.REDIS_URL;
+    const redisUrl = process.env.KV_URL || process.env.STORAGE_SBEMKA_REDIS_URL || process.env.REDIS_URL;
     if (redisUrl) {
       try {
         const client = createClient({ url: redisUrl });
