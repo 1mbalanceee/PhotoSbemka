@@ -121,7 +121,8 @@ function Nav() {
   };
 
   return (
-    <header style={{
+    <>
+      <header style={{
       position: 'sticky', top: 0, zIndex: 50,
       padding: scrolled ? '14px 0' : '22px 0',
       background: scrolled ? 'rgba(246,241,232,.9)' : 'transparent',
@@ -195,7 +196,7 @@ function Nav() {
           >
             <span style={{
               width: 22, height: 2, background: 'var(--ink)', transition: 'all 0.3s ease',
-              transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none'
+              transform: menuOpen ? 'translateY(7px) rotate(45deg)' : 'none'
             }} />
             <span style={{
               width: 22, height: 2, background: 'var(--ink)', transition: 'all 0.3s ease',
@@ -203,7 +204,7 @@ function Nav() {
             }} />
             <span style={{
               width: 22, height: 2, background: 'var(--ink)', transition: 'all 0.3s ease',
-              transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none'
+              transform: menuOpen ? 'translateY(-7px) rotate(-45deg)' : 'none'
             }} />
           </button>
         </div>
@@ -216,75 +217,76 @@ function Nav() {
           .nav-cta { display: none !important; }
         }
       `}</style>
+    </header>
 
-      {menuOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 55,
-          background: 'rgba(246, 241, 232, 0.98)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-          gap: 36, animation: 'fadeIn 0.25s ease-out',
-        }}>
-          <style>{`
-            @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(-10px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
-          `}</style>
-          {links.map(([l, h], idx) => (
-            <a 
-              key={h} href={h} 
-              onClick={() => {
-                setMenuOpen(false);
-                if (window.location.search.includes('story') || window.location.search.includes('leads') || window.location.search.includes('admin')) {
-                  window.__navigate('home');
-                  setTimeout(() => {
-                    const el = document.querySelector(h);
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }, 150);
-                }
-              }}
-              style={{
-                fontFamily: 'var(--serif)', fontSize: 32, fontStyle: 'italic',
-                color: 'var(--ink)', textDecoration: 'none', opacity: 0.9,
-                animation: `slideIn 0.3s ease-out ${idx * 0.05}s both`,
-              }}
-            >
-              {l}
-            </a>
-          ))}
+    {menuOpen && (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 55,
+        background: 'rgba(246, 241, 232, 0.98)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+        gap: 36, animation: 'fadeIn 0.25s ease-out',
+      }}>
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+        {links.map(([l, h], idx) => (
           <a 
-            href="#contact" 
+            key={h} href={h} 
             onClick={() => {
               setMenuOpen(false);
               if (window.location.search.includes('story') || window.location.search.includes('leads') || window.location.search.includes('admin')) {
                 window.__navigate('home');
                 setTimeout(() => {
-                  const el = document.querySelector('#contact');
+                  const el = document.querySelector(h);
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }, 150);
               }
             }}
             style={{
-              marginTop: 24, fontSize: 16, padding: '14px 28px', borderRadius: 999,
-              background: 'var(--ink)', color: 'var(--bg)', textDecoration: 'none',
-              letterSpacing: '.02em', fontWeight: 500, fontFamily: 'var(--sans)',
-              animation: 'slideIn 0.3s ease-out 0.3s both',
+              fontFamily: 'var(--serif)', fontSize: 32, fontStyle: 'italic',
+              color: 'var(--ink)', textDecoration: 'none', opacity: 0.9,
+              animation: `slideIn 0.3s ease-out ${idx * 0.05}s both`,
             }}
           >
-            Обсудить идею →
+            {l}
           </a>
-          <style>{`
-            @keyframes slideIn {
-              from { opacity: 0; transform: translateY(20px); }
-              to { opacity: 1; transform: translateY(0); }
+        ))}
+        <a 
+          href="#contact" 
+          onClick={() => {
+            setMenuOpen(false);
+            if (window.location.search.includes('story') || window.location.search.includes('leads') || window.location.search.includes('admin')) {
+              window.__navigate('home');
+              setTimeout(() => {
+                const el = document.querySelector('#contact');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }, 150);
             }
-          `}</style>
-        </div>
-      )}
-    </header>
-  );
+          }}
+          style={{
+            marginTop: 24, fontSize: 16, padding: '14px 28px', borderRadius: 999,
+            background: 'var(--ink)', color: 'var(--bg)', textDecoration: 'none',
+            letterSpacing: '.02em', fontWeight: 500, fontFamily: 'var(--sans)',
+            animation: 'slideIn 0.3s ease-out 0.3s both',
+          }}
+        >
+          Обсудить идею →
+        </a>
+        <style>{`
+          @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+      </div>
+    )}
+  </>
+);
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -551,7 +553,7 @@ function About() {
               </p>
               <p style={{ margin: 0 }}>
                 На&nbsp;моих съёмках люди не&nbsp;застывают в&nbsp;неудобных позах —
-                они <em style={{ fontFamily: 'var(--serif)', fontStyle: 'italic' }}>живут в&nbsp;кадре</em> через
+                они живут в&nbsp;кадре через
                 игру, разговор и&nbsp;настоящие эмоции.
               </p>
             </div>
@@ -737,7 +739,7 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
           opacity: 0.9, flexWrap: 'wrap', gap: 12,
         }}>
           <span style={{ textTransform: 'uppercase', color: 'var(--accent)' }}>{item.c}</span>
-          <span style={{ opacity: .65 }}>{item.ratio} · raw → retouch · swipe to browse</span>
+          <span style={{ opacity: .65 }}>исходник → ретушь · листайте для просмотра</span>
         </div>
       </div>
 
@@ -993,7 +995,7 @@ function Process() {
       <div className="container">
         <SectionLabel num="03">Как проходит съёмка</SectionLabel>
         <SerifH size={64}>
-          Без сюрпризов. <em>Шаг за&nbsp;шагом — до&nbsp;готовых фото.</em>
+          Как рождается история. <em>Шаг за&nbsp;шагом — от&nbsp;идеи до&nbsp;готовых кадров.</em>
         </SerifH>
         <p style={{ maxWidth: 540, fontSize: 17, lineHeight: 1.55, color: 'var(--ink-soft)', marginTop: 24 }}>
           Понятный процесс — половина успеха съёмки. Вы знаете, что и когда происходит, и&nbsp;когда получите файлы.
@@ -1047,8 +1049,8 @@ function Process() {
 function Trust() {
   const items = [
     {
-      k: 'Оплата после съёмки',
-      v: 'Вы платите за результат. Никаких предоплат «вслепую» — сначала съёмка, потом деньги.',
+      k: 'Оплата по факту',
+      v: 'Вы оплачиваете съёмку в день её проведения. Никаких обязательных предоплат для стандартных пакетов — всё строится на взаимном доверии.',
       icon: '✓',
     },
     {
@@ -1057,8 +1059,8 @@ function Trust() {
       icon: '✦',
     },
     {
-      k: 'Договорённость на берегу',
-      v: 'Фиксируем условия устно или письменно: что снимаем, где, сколько и в каком виде получаете.',
+      k: 'Согласование деталей',
+      v: 'Перед съёмкой мы детально обсуждаем концепцию, локации, сроки и формат готовых фотографий, чтобы результат точно соответствовал вашим ожиданиям.',
       icon: '§',
     },
   ];
@@ -1068,7 +1070,7 @@ function Trust() {
         <SectionLabel num="05">Условия и гарантии</SectionLabel>
         <div className="trust-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
           <SerifH size={56}>
-            Прозрачно. <em>Никаких неожиданностей.</em>
+            Комфорт и&nbsp;уверенность <em>на&nbsp;каждом этапе.</em>
           </SerifH>
           <div style={{ display: 'grid', gap: 1, background: 'rgba(42,37,32,.12)', border: '1px solid rgba(42,37,32,.12)' }}>
             {items.map((it) => (
@@ -1132,11 +1134,6 @@ function Stories() {
           <SerifH size={64}>
             Мини-истории <em>из&nbsp;недавних съёмок</em>.
           </SerifH>
-          <a href="#" onClick={(e) => { e.preventDefault(); window.__navigate('story', 0); }} style={{
-            fontSize: 13.5, color: 'var(--ink)', textDecoration: 'none',
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            borderBottom: '1px solid var(--accent)', paddingBottom: 4,
-          }}>Все истории →</a>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 28 }} className="stories-grid">
           <style>{`
@@ -1242,7 +1239,7 @@ function Pricing() {
         }}>
           <div>
             <SerifH size={64}>
-              Понятные тарифы. <em>Без скрытых платежей.</em>
+              Прозрачная стоимость. <em>Фиксированные тарифы под&nbsp;любые задачи.</em>
             </SerifH>
             <p style={{ maxWidth: 580, fontSize: 17, lineHeight: 1.55, color: 'var(--ink-soft)', marginTop: 24, margin: '24px 0 0' }}>
               Выберите готовый пакет или расскажите о вашей задумке — я помогу рассчитать индивидуальный вариант под ваш бюджет и задачи.
@@ -2294,7 +2291,7 @@ function LeadsDashboard() {
                   type="text" 
                   value={loginForm.username}
                   onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
-                  placeholder="Например, nadya" 
+                  placeholder="" 
                   required
                   style={{
                     width: '100%', padding: '12px 14px', borderRadius: 6,

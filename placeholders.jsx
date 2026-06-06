@@ -88,7 +88,6 @@ function Placeholder({ src, caption, idx = 0, ratio = '4/5', rounded = 0, style,
           }}
         >
           <span>{caption}</span>
-          <span style={{ opacity: 0.6 }}>{ratio}</span>
         </div>
       )}
       {children}
